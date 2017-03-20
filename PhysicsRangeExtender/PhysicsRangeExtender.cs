@@ -51,7 +51,7 @@ namespace PhysicsRangeExtender
             }
             catch (Exception e)
             {
-                Debug.Log("[PhysicsEnhancer]:Failed to Load Physics Distance -" + e);
+                Debug.Log("[PhysicsRangeExtender]:Failed to Load Physics Distance -" + e);
             }
         }
     }

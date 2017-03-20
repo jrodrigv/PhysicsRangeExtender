@@ -1,8 +1,8 @@
 {
   "NAME": "VesselSwitcher",
-  "URL":"https://raw.githubusercontent.com/jrodrigv/PhysicsRangeExtender/master/Distribution/GameData/PhysicsRangeExtender/PhysicsRangeExtender.version",
+  "URL":"https://github.com/jrodrigv/PhysicsRangeExtender/raw/master/PhysicsRangeExtender/Distribution/GameData/PhysicsRangeExtender/PhysicsRangeExtender.version",
   "DOWNLOAD":"https://github.com/jrodrigv/PhysicsRangeExtender/releases/tag/1.0.0",
-  "CHANGE_LOG_URL":"https://github.com/PapaJoesSoup/BDALoadedVesselSwitcher/blob/master/Distribution/GameData/BDALoadedVesselSwitcher/ChangeLog.txt",
+  "CHANGE_LOG_URL":"https://github.com/jrodrigv/PhysicsRangeExtender/raw/master/PhysicsRangeExtender/Distribution/GameData/PhysicsRangeExtender/ChangeLog.txt",
   "VERSION": {
     "MAJOR": 1, 
     "MINOR": 1,
