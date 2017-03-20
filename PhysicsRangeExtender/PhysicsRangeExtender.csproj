@@ -52,7 +52,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Distribution\GameData\PhysicsRangeExtender\ChangeLog.txt" />
-    <Content Include="Distribution\GameData\PhysicsRangeExtender\License.txt" />
     <Content Include="Distribution\GameData\PhysicsRangeExtender\Plugins\PhysicsRangeExtender.dll" />
     <Content Include="LocalDev\7za_dir.txt" />
     <Content Include="LocalDev\dist_dir.txt" />

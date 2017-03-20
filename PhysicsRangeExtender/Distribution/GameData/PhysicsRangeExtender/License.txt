@@ -1,8 +1,0 @@
-This mod addon is released under the MIT license.
-https://opensource.org/licenses/MIT
-
-Credits:  Original Author:  BahamutoD (Paolo Encarnaciona)
-Original Source: https://github.com/BahamutoD/BDALoadedVesselSwitcher
-
-Current author (for continued support): Papa_Joe  (Joe Korinek)
-Current Source: https://github.com/PapaJoesSoup/BDALoadedVesselSwitcher
