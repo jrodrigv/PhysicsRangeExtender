@@ -5,7 +5,7 @@
   "CHANGE_LOG_URL":"https://github.com/jrodrigv/PhysicsRangeExtender/raw/master/PhysicsRangeExtender/Distribution/GameData/PhysicsRangeExtender/ChangeLog.txt",
   "VERSION": {
     "MAJOR": 1, 
-    "MINOR": 0,
+    "MINOR": 1,
     "PATCH": 0
   },
   "KSP_VERSION": {
