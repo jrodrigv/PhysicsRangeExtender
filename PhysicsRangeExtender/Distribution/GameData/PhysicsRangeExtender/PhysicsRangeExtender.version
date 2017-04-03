@@ -1,7 +1,7 @@
 {
   "NAME": "PhysicsRangeExtender",
   "URL":"https://github.com/jrodrigv/PhysicsRangeExtender/raw/master/PhysicsRangeExtender/Distribution/GameData/PhysicsRangeExtender/PhysicsRangeExtender.version",
-  "DOWNLOAD":"https://github.com/jrodrigv/PhysicsRangeExtender/releases/tag/1.0.0",
+  "DOWNLOAD":"https://github.com/jrodrigv/PhysicsRangeExtender/releases/tag/1.1.0",
   "CHANGE_LOG_URL":"https://github.com/jrodrigv/PhysicsRangeExtender/raw/master/PhysicsRangeExtender/Distribution/GameData/PhysicsRangeExtender/ChangeLog.txt",
   "VERSION": {
     "MAJOR": 1, 
