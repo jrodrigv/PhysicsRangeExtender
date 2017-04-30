@@ -1,3 +1,8 @@
+
+= v1.2.0
+- Added settings.cfg to allow adjust the ranges.
+	RangeForLandedVessels: parameter that can be reduced in order to avoid landed vessels to crash into the terrain
+	GlobalRange: For all scenarios different than Landed.
 = v1.1.0
 - Extending to 2000km. Compiled for KSP 1.2.9
 = v1.0.0

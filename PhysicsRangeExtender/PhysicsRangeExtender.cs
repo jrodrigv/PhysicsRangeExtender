@@ -6,19 +6,20 @@ namespace PhysicsRangeExtender
     [KSPAddon(KSPAddon.Startup.FlightAndKSC, false)]
     public class PhysicsRangeExtender : MonoBehaviour
     {
-        private const int RangeInKm = 2000;
-        private readonly VesselRanges.Situation _maxSituation = new VesselRanges.Situation(RangeInKm * 1000 - 15, RangeInKm * 1000 - 10, RangeInKm*1000, RangeInKm * 1000 - 20);
+        private VesselRanges.Situation _globalSituation, _landedSituation;
 
         void Start()
         {
-            FloatingOrigin.fetch.threshold = Mathf.Pow(RangeInKm * 1000 + 3500, 2);
+            FloatingOrigin.fetch.threshold = Mathf.Pow(PRESettings.GlobalRange + 3500, 2);
+
+            _globalSituation = new VesselRanges.Situation(PRESettings.GlobalRange * 1000 - 15, PRESettings.GlobalRange * 1000 - 10, PRESettings.GlobalRange * 1000, PRESettings.GlobalRange * 1000 - 20);
+            _landedSituation = new VesselRanges.Situation(PRESettings.RangeForLandedVessels * 1000 - 15, PRESettings.RangeForLandedVessels * 1000 - 10, PRESettings.RangeForLandedVessels * 1000, PRESettings.RangeForLandedVessels * 1000 - 20);
 
             GameEvents.onVesselSwitching.Add(ApplyPhysRange);
             GameEvents.onVesselCreate.Add(ApplyPhysRange);
             GameEvents.onVesselGoOnRails.Add(ApplyPhysRange);
             GameEvents.onVesselGoOffRails.Add(ApplyPhysRange);
             GameEvents.onVesselLoaded.Add(ApplyPhysRange);
-            GameEvents.onVesselSwitchingToUnloaded.Add(ApplyPhysRange);
 
             ApplyPhysRange();
 
@@ -41,13 +42,16 @@ namespace PhysicsRangeExtender
                 int vesselsCount = FlightGlobals.Vessels.Count;
                 for (int i = 0; i < vesselsCount; i++)
                 {
-                    FlightGlobals.Vessels[i].vesselRanges.escaping = _maxSituation;
-                    FlightGlobals.Vessels[i].vesselRanges.flying = _maxSituation;
-                    FlightGlobals.Vessels[i].vesselRanges.landed = _maxSituation;
-                    FlightGlobals.Vessels[i].vesselRanges.orbit = _maxSituation;
-                    FlightGlobals.Vessels[i].vesselRanges.prelaunch = _maxSituation;
-                    FlightGlobals.Vessels[i].vesselRanges.splashed = _maxSituation;
-                    FlightGlobals.Vessels[i].vesselRanges.subOrbital = _maxSituation;
+                    FlightGlobals.Vessels[i].vesselRanges = new VesselRanges(new VesselRanges
+                    {
+                        escaping = _globalSituation,
+                        flying = _globalSituation,
+                        landed = _landedSituation,
+                        orbit = _globalSituation,
+                        prelaunch = _globalSituation,
+                        splashed = _globalSituation,
+                        subOrbital = _globalSituation
+                    });
                 }
             }
             catch (Exception e)

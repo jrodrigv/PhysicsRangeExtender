@@ -42,9 +42,11 @@
   <ItemGroup>
     <Compile Include="PhysicsRangeExtender.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PRESettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Distribution\GameData\PhysicsRangeExtender\PhysicsRangeExtender.version" />
+    <None Include="Distribution\GameData\PhysicsRangeExtender\settings.cfg" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Distribution\GameData\PhysicsRangeExtender\ChangeLog.txt" />
