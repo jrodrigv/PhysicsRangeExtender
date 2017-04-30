@@ -41,8 +41,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PhysicsRangeExtender.cs" />
+    <Compile Include="PreSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PRESettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Distribution\GameData\PhysicsRangeExtender\PhysicsRangeExtender.version" />

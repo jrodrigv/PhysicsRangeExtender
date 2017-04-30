@@ -10,10 +10,10 @@ namespace PhysicsRangeExtender
 
         void Start()
         {
-            FloatingOrigin.fetch.threshold = Mathf.Pow(PRESettings.GlobalRange + 3500, 2);
+            FloatingOrigin.fetch.threshold = Mathf.Pow(PreSettings.GlobalRange + 3500, 2);
 
-            _globalSituation = new VesselRanges.Situation(PRESettings.GlobalRange * 1000 - 15, PRESettings.GlobalRange * 1000 - 10, PRESettings.GlobalRange * 1000, PRESettings.GlobalRange * 1000 - 20);
-            _landedSituation = new VesselRanges.Situation(PRESettings.RangeForLandedVessels * 1000 - 15, PRESettings.RangeForLandedVessels * 1000 - 10, PRESettings.RangeForLandedVessels * 1000, PRESettings.RangeForLandedVessels * 1000 - 20);
+            _globalSituation = new VesselRanges.Situation(PreSettings.GlobalRange * 1000 - 15, PreSettings.GlobalRange * 1000 - 10, PreSettings.GlobalRange * 1000, PreSettings.GlobalRange * 1000 - 20);
+            _landedSituation = new VesselRanges.Situation(PreSettings.RangeForLandedVessels * 1000 - 15, PreSettings.RangeForLandedVessels * 1000 - 10, PreSettings.RangeForLandedVessels * 1000, PreSettings.RangeForLandedVessels * 1000 - 20);
 
             GameEvents.onVesselSwitching.Add(ApplyPhysRange);
             GameEvents.onVesselCreate.Add(ApplyPhysRange);

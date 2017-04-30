@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace PhysicsRangeExtender
 {
     [KSPAddon(KSPAddon.Startup.EveryScene, false)]
-    public class PRESettings : MonoBehaviour
+    public class PreSettings : MonoBehaviour
     {
-        public static string settingsConfigURL = "GameData/PhysicsRangeExtender/settings.cfg";
+        public static string SettingsConfigUrl = "GameData/PhysicsRangeExtender/settings.cfg";
 
         public static int RangeForLandedVessels = 2000;
         public static int GlobalRange = 2000;
@@ -25,10 +22,10 @@ namespace PhysicsRangeExtender
             {
                 Debug.Log("== PhysicsRangeExtender: Loading settings.cfg ==");
 
-                ConfigNode fileNode = ConfigNode.Load(settingsConfigURL);
-                if (!fileNode.HasNode("PRESettings")) return;
+                ConfigNode fileNode = ConfigNode.Load(SettingsConfigUrl);
+                if (!fileNode.HasNode("PreSettings")) return;
 
-                ConfigNode settings = fileNode.GetNode("PRESettings");
+                ConfigNode settings = fileNode.GetNode("PreSettings");
 
                 RangeForLandedVessels = int.Parse(settings.GetValue("RangeForLandedVessels"));
                 GlobalRange = int.Parse(settings.GetValue("GlobalRange"));
@@ -36,7 +33,7 @@ namespace PhysicsRangeExtender
             }
             catch (Exception ex)
             {
-                Debug.Log("== PhysicsRangeExtender : Failed to load settings config==");
+                Debug.Log("== PhysicsRangeExtender : Failed to load settings config:" + ex.Message);
             }
         }
     }
