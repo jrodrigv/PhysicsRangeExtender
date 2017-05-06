@@ -40,6 +40,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Gui.cs" />
     <Compile Include="PhysicsRangeExtender.cs" />
     <Compile Include="PreSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -51,6 +52,7 @@
   <ItemGroup>
     <Content Include="Distribution\GameData\PhysicsRangeExtender\ChangeLog.txt" />
     <Content Include="Distribution\GameData\PhysicsRangeExtender\Plugins\PhysicsRangeExtender.dll" />
+    <Content Include="Distribution\GameData\PhysicsRangeExtender\Textures\icon.png" />
     <Content Include="LocalDev\7za_dir.txt" />
     <Content Include="LocalDev\dist_dir.txt" />
     <Content Include="LocalDev\ksp_dir.txt" />
