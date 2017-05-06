@@ -6,52 +6,69 @@ namespace PhysicsRangeExtender
     [KSPAddon(KSPAddon.Startup.FlightAndKSC, false)]
     public class PhysicsRangeExtender : MonoBehaviour
     {
+        private static VesselRanges _baseRanges;
         private VesselRanges.Situation _globalSituation, _landedSituation;
 
-        void Start()
+        private static bool _enabled = true;
+        public static bool Enabled {
+            get => _enabled;
+            set
+            {
+                _enabled = value;
+                UpdateRanges(_enabled);
+            }
+
+        }
+
+        private void Start()
         {
             FloatingOrigin.fetch.threshold = Mathf.Pow(PreSettings.GlobalRange + 3500, 2);
 
-            _globalSituation = new VesselRanges.Situation(PreSettings.GlobalRange * 1000 - 15, PreSettings.GlobalRange * 1000 - 10, PreSettings.GlobalRange * 1000, PreSettings.GlobalRange * 1000 - 20);
-            _landedSituation = new VesselRanges.Situation(PreSettings.RangeForLandedVessels * 1000 - 15, PreSettings.RangeForLandedVessels * 1000 - 10, PreSettings.RangeForLandedVessels * 1000, PreSettings.RangeForLandedVessels * 1000 - 20);
+            _globalSituation = new VesselRanges.Situation(PreSettings.GlobalRange * 1000 - 15,
+                PreSettings.GlobalRange * 1000 - 10, PreSettings.GlobalRange * 1000,
+                PreSettings.GlobalRange * 1000 - 20);
+            _landedSituation = new VesselRanges.Situation(PreSettings.RangeForLandedVessels * 1000 - 15,
+                PreSettings.RangeForLandedVessels * 1000 - 10, PreSettings.RangeForLandedVessels * 1000,
+                PreSettings.RangeForLandedVessels * 1000 - 20);
 
-            GameEvents.onVesselSwitching.Add(ApplyPhysRange);
+            _baseRanges = new VesselRanges
+            {
+                escaping = _globalSituation,
+                flying = _globalSituation,
+                landed = _landedSituation,
+                orbit = _globalSituation,
+                prelaunch = _globalSituation,
+                splashed = _globalSituation,
+                subOrbital = _globalSituation
+            };
             GameEvents.onVesselCreate.Add(ApplyPhysRange);
-            GameEvents.onVesselGoOnRails.Add(ApplyPhysRange);
-            GameEvents.onVesselGoOffRails.Add(ApplyPhysRange);
-            GameEvents.onVesselLoaded.Add(ApplyPhysRange);
-
-            ApplyPhysRange();
-
         }
 
-        private void ApplyPhysRange(Vessel data0, Vessel data1)
+        private void ApplyPhysRange(Vessel data)
         {
-            ApplyPhysRange();
+            if (Enabled)
+            {
+                data.vesselRanges = new VesselRanges(_baseRanges);
+            }
         }
 
-        private void ApplyPhysRange(Vessel v)
-        {
-            ApplyPhysRange();
-        }
 
-        public void ApplyPhysRange()
+        private static void UpdateRanges(bool enabled)
         {
             try
             {
-                int vesselsCount = FlightGlobals.Vessels.Count;
-                for (int i = 0; i < vesselsCount; i++)
+                var vesselsCount = FlightGlobals.Vessels.Count;
+                for (var i = 0; i < vesselsCount; i++)
                 {
-                    FlightGlobals.Vessels[i].vesselRanges = new VesselRanges(new VesselRanges
+                    if (enabled)
                     {
-                        escaping = _globalSituation,
-                        flying = _globalSituation,
-                        landed = _landedSituation,
-                        orbit = _globalSituation,
-                        prelaunch = _globalSituation,
-                        splashed = _globalSituation,
-                        subOrbital = _globalSituation
-                    });
+                        FlightGlobals.Vessels[i].vesselRanges = new VesselRanges(_baseRanges);
+                    }
+                    else
+                    {
+                        FlightGlobals.Vessels[i].vesselRanges = new VesselRanges();
+                    }
+                   
                 }
             }
             catch (Exception e)
