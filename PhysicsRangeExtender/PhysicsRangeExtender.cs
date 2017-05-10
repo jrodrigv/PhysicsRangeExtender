@@ -7,20 +7,55 @@ namespace PhysicsRangeExtender
     public class PhysicsRangeExtender : MonoBehaviour
     {
         private static VesselRanges _baseRanges;
-        private VesselRanges.Situation _globalSituation, _landedSituation;
+        private static VesselRanges.Situation _globalSituation;
+        private static VesselRanges.Situation _landedSituation;
 
         private static bool _enabled = true;
-        public static bool Enabled {
+
+        public static bool Enabled
+        {
             get => _enabled;
             set
             {
                 _enabled = value;
-                UpdateRanges(_enabled);
+                ApplyRangesToVessels(_enabled);
             }
-
         }
 
         private void Start()
+        {
+            UpdateRanges();
+
+            
+            GameEvents.onVesselCreate.Add(ApplyPhysRange);
+            GameEvents.onVesselSwitchingToUnloaded.Add(ApplyPhysRange);
+            GameEvents.onVesselGoOffRails.Add(ApplyPhysRange);
+            GameEvents.onVesselLoaded.Add(ApplyPhysRange);
+            GameEvents.onVesselSwitching.Add(ApplyPhysRange);
+            GameEvents.onVesselGoOnRails.Add(ApplyPhysRange);
+        }
+
+        void OnDestroy()
+        {
+            GameEvents.onVesselCreate.Remove(ApplyPhysRange);
+            GameEvents.onVesselSwitchingToUnloaded.Remove(ApplyPhysRange);
+            GameEvents.onVesselGoOffRails.Remove(ApplyPhysRange);
+            GameEvents.onVesselLoaded.Remove(ApplyPhysRange);
+            GameEvents.onVesselSwitching.Remove(ApplyPhysRange);
+            GameEvents.onVesselGoOnRails.Remove(ApplyPhysRange);
+        }
+
+        private void ApplyPhysRange(Vessel data0, Vessel data1)
+        {
+            ApplyRangesToVessels(Enabled);
+        }
+
+        private void ApplyPhysRange(Vessel data)
+        {
+            ApplyRangesToVessels(Enabled);
+        }
+
+        public static void UpdateRanges()
         {
             FloatingOrigin.fetch.threshold = Mathf.Pow(PreSettings.GlobalRange + 3500, 2);
 
@@ -41,19 +76,10 @@ namespace PhysicsRangeExtender
                 splashed = _globalSituation,
                 subOrbital = _globalSituation
             };
-            GameEvents.onVesselCreate.Add(ApplyPhysRange);
+            ApplyRangesToVessels(_enabled);
         }
 
-        private void ApplyPhysRange(Vessel data)
-        {
-            if (Enabled)
-            {
-                data.vesselRanges = new VesselRanges(_baseRanges);
-            }
-        }
-
-
-        private static void UpdateRanges(bool enabled)
+        private static void ApplyRangesToVessels(bool enabled)
         {
             try
             {
@@ -68,7 +94,6 @@ namespace PhysicsRangeExtender
                     {
                         FlightGlobals.Vessels[i].vesselRanges = new VesselRanges();
                     }
-                   
                 }
             }
             catch (Exception e)

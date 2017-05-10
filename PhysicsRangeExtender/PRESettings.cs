@@ -8,8 +8,8 @@ namespace PhysicsRangeExtender
     {
         public static string SettingsConfigUrl = "GameData/PhysicsRangeExtender/settings.cfg";
 
-        public static int RangeForLandedVessels = 2000;
-        public static int GlobalRange = 2000;
+        public static int RangeForLandedVessels { get; set; }
+        public static int GlobalRange { get; set; }
 
         void Awake()
         {
@@ -26,7 +26,6 @@ namespace PhysicsRangeExtender
                 if (!fileNode.HasNode("PreSettings")) return;
 
                 ConfigNode settings = fileNode.GetNode("PreSettings");
-
                 RangeForLandedVessels = int.Parse(settings.GetValue("RangeForLandedVessels"));
                 GlobalRange = int.Parse(settings.GetValue("GlobalRange"));
                 
@@ -36,5 +35,26 @@ namespace PhysicsRangeExtender
                 Debug.Log("== PhysicsRangeExtender : Failed to load settings config:" + ex.Message);
             }
         }
+
+        public static void SaveConfig()
+        {
+            try
+            {
+                Debug.Log("== PhysicsRangeExtender: Saving settings.cfg ==");
+                ConfigNode fileNode = ConfigNode.Load(SettingsConfigUrl);
+                if (!fileNode.HasNode("PreSettings")) return;
+                ConfigNode settings = fileNode.GetNode("PreSettings");
+
+                settings.SetValue("RangeForLandedVessels", RangeForLandedVessels);
+                settings.SetValue("GlobalRange", GlobalRange);
+                fileNode.Save(SettingsConfigUrl);
+            }
+            catch (Exception ex)
+            {
+                Debug.Log("== PhysicsRangeExtender : Failed to save settings config:" + ex.Message); throw;
+            }
+        }
+
+
     }
 }
