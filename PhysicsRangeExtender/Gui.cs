@@ -95,8 +95,9 @@ namespace PhysicsRangeExtender
                 fontSize = 11,
                 alignment = TextAnchor.MiddleCenter
             };
-            GUI.Label(new Rect(0, ContentTop + line * entryHeight, 60, entryHeight),
-                "Warning: Range greater than 100 km may cause glitches.",
+
+            GUI.Label(new Rect(0, ContentTop + line * entryHeight, WindowWidth, 20),
+                "Warning: Range > 100km may cause glitches.",
                 titleStyle);
         }
 
