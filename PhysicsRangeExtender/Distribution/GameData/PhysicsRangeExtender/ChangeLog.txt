@@ -1,4 +1,6 @@
-
+= v1.3.0
+- Added GUI to enable/disable the mod and adjust the ranges
+- Several code improvements
 = v1.2.0
 - Added settings.cfg to allow adjust the ranges.
 	RangeForLandedVessels: parameter that can be reduced in order to avoid landed vessels to crash into the terrain
