@@ -47,7 +47,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Distribution\GameData\PhysicsRangeExtender\LICENSE" />
+    <Content Include="Distribution\GameData\PhysicsRangeExtender\LICENSE.txt" />
     <None Include="Distribution\GameData\PhysicsRangeExtender\PhysicsRangeExtender.version" />
     <None Include="Distribution\GameData\PhysicsRangeExtender\README.md" />
     <None Include="Distribution\GameData\PhysicsRangeExtender\settings.cfg" />
