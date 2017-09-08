@@ -11,7 +11,7 @@ namespace PhysicsRangeExtender
         private static VesselRanges.Situation _landedSituation;
 
         private static bool _enabled = true;
-
+        private static bool _unloadDueToReferenceFrameApplied = false;
         public static bool Enabled
         {
             get => _enabled;
@@ -22,31 +22,26 @@ namespace PhysicsRangeExtender
             }
         }
 
-        private void Start()
+        void Start()
         {
             UpdateRanges();
-
-            
+ 
             GameEvents.onVesselCreate.Add(ApplyPhysRange);
-            GameEvents.onVesselSwitchingToUnloaded.Add(ApplyPhysRange);
-            GameEvents.onVesselGoOffRails.Add(ApplyPhysRange);
             GameEvents.onVesselLoaded.Add(ApplyPhysRange);
             GameEvents.onVesselSwitching.Add(ApplyPhysRange);
-            GameEvents.onVesselGoOnRails.Add(ApplyPhysRange);
         }
 
         void OnDestroy()
         {
             GameEvents.onVesselCreate.Remove(ApplyPhysRange);
-            GameEvents.onVesselSwitchingToUnloaded.Remove(ApplyPhysRange);
-            GameEvents.onVesselGoOffRails.Remove(ApplyPhysRange);
             GameEvents.onVesselLoaded.Remove(ApplyPhysRange);
             GameEvents.onVesselSwitching.Remove(ApplyPhysRange);
-            GameEvents.onVesselGoOnRails.Remove(ApplyPhysRange);
         }
+
 
         private void ApplyPhysRange(Vessel data0, Vessel data1)
         {
+            _unloadDueToReferenceFrameApplied = false;
             ApplyRangesToVessels(Enabled);
         }
 
@@ -55,16 +50,65 @@ namespace PhysicsRangeExtender
             ApplyRangesToVessels(Enabled);
         }
 
+        void FixedUpdate()
+        {
+            AvoidReferenceFrameChangeIssues();
+        }
+
+        private void AvoidReferenceFrameChangeIssues()
+        {
+            var safetyMargin = 0.90f;
+
+            if (FlightGlobals.ActiveVessel == null ||
+                FlightGlobals.ActiveVessel.LandedOrSplashed ||
+                FlightGlobals.ActiveVessel.orbit == null ||
+                FlightGlobals.ActiveVessel.orbit.referenceBody == null)
+                
+            {
+                return;
+            }
+
+            var altitudeAtPos =
+                (double) FlightGlobals.getAltitudeAtPos(FlightGlobals.ActiveVessel.transform.position,
+                    FlightGlobals.ActiveVessel.orbit.referenceBody);
+
+            if ((altitudeAtPos / FlightGlobals.ActiveVessel.orbit.referenceBody.inverseRotThresholdAltitude) > safetyMargin)
+            {
+                UnloadLandedVessels();
+            }
+
+        }
+
+        private void UnloadLandedVessels()
+        {
+            var vesselsCount = FlightGlobals.Vessels.Count;
+
+            for (var i = 0; i < vesselsCount; i++)
+            {
+                if (FlightGlobals.Vessels[i].LandedOrSplashed)
+                {
+                    FlightGlobals.Vessels[i].vesselRanges = new VesselRanges();
+                    FlightGlobals.Vessels[i].vesselRanges.landed.pack =
+                        PreSettings.RangeForLandedVessels * 1000 * 1.15f;
+                }
+            }
+        }
+
         public static void UpdateRanges()
         {
-            FloatingOrigin.fetch.threshold = Mathf.Pow(PreSettings.GlobalRange + 3500, 2);
+            Debug.Log("PRE: Updating ranges");
+            FloatingOrigin.fetch.threshold = Mathf.Pow(PreSettings.GlobalRange * 1.20f, 2);
 
-            _globalSituation = new VesselRanges.Situation(PreSettings.GlobalRange * 1000 - 15,
-                PreSettings.GlobalRange * 1000 - 10, PreSettings.GlobalRange * 1000,
-                PreSettings.GlobalRange * 1000 - 20);
-            _landedSituation = new VesselRanges.Situation(PreSettings.RangeForLandedVessels * 1000 - 15,
-                PreSettings.RangeForLandedVessels * 1000 - 10, PreSettings.RangeForLandedVessels * 1000,
-                PreSettings.RangeForLandedVessels * 1000 - 20);
+            _globalSituation = new VesselRanges.Situation(
+                load: PreSettings.GlobalRange * 1000,
+                unload: PreSettings.GlobalRange * 1000 * 1.10f, 
+                pack: PreSettings.GlobalRange * 1000 * 1.15f,
+                unpack: PreSettings.GlobalRange * 1000 * 1.05f);
+            _landedSituation = new VesselRanges.Situation(
+                load: PreSettings.RangeForLandedVessels * 1000,
+                unload: PreSettings.RangeForLandedVessels * 1000 * 1.10f,
+                pack: PreSettings.RangeForLandedVessels * 1000 * 1.15f,
+                unpack: PreSettings.RangeForLandedVessels * 1000 * 1.05f);
 
             _baseRanges = new VesselRanges
             {
@@ -84,6 +128,7 @@ namespace PhysicsRangeExtender
             try
             {
                 var vesselsCount = FlightGlobals.Vessels.Count;
+
                 for (var i = 0; i < vesselsCount; i++)
                 {
                     if (enabled)
