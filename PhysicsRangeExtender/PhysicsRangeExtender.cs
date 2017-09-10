@@ -11,7 +11,7 @@ namespace PhysicsRangeExtender
         private static VesselRanges.Situation _landedSituation;
 
         private static bool _enabled = true;
-        private static bool _unloadDueToReferenceFrameApplied = false;
+        private static bool _unloadDueToReferenceFrameApplied;
         public static bool Enabled
         {
             get => _enabled;
@@ -74,7 +74,16 @@ namespace PhysicsRangeExtender
 
             if ((altitudeAtPos / FlightGlobals.ActiveVessel.orbit.referenceBody.inverseRotThresholdAltitude) > safetyMargin)
             {
-                UnloadLandedVessels();
+                if (!_unloadDueToReferenceFrameApplied)
+                {
+                      UnloadLandedVessels();
+                    _unloadDueToReferenceFrameApplied = true;
+                }
+            }
+            else if(_unloadDueToReferenceFrameApplied)
+            {
+                UpdateRanges();
+                _unloadDueToReferenceFrameApplied = false;
             }
 
         }
@@ -87,28 +96,44 @@ namespace PhysicsRangeExtender
             {
                 if (FlightGlobals.Vessels[i].LandedOrSplashed)
                 {
-                    FlightGlobals.Vessels[i].vesselRanges = new VesselRanges();
-                    FlightGlobals.Vessels[i].vesselRanges.landed.pack =
-                        PreSettings.RangeForLandedVessels * 1000 * 1.15f;
+
+                   var safeSituation = new VesselRanges.Situation(
+                        load: FlightGlobals.ActiveVessel.orbit.referenceBody.inverseRotThresholdAltitude * 0.90f,
+                        unload: FlightGlobals.ActiveVessel.orbit.referenceBody.inverseRotThresholdAltitude * 0.95f,
+                        pack: PreSettings.GlobalRange * 1000 * 1.10f,
+                        unpack: PreSettings.GlobalRange * 1000 * 0.99f);
+
+                    var newRanges = new VesselRanges
+                    {
+                        escaping = _globalSituation,
+                        flying = _globalSituation,
+                        landed = safeSituation,
+                        orbit = _globalSituation,
+                        prelaunch = safeSituation,
+                        splashed = safeSituation,
+                        subOrbital = _globalSituation
+                    };
+
+                    FlightGlobals.Vessels[i].vesselRanges = newRanges;
                 }
             }
         }
 
         public static void UpdateRanges()
         {
-            Debug.Log("PRE: Updating ranges");
+            Debug.Log("== PhysicsRangeExtender :  Updating ranges");
             FloatingOrigin.fetch.threshold = Mathf.Pow(PreSettings.GlobalRange * 1.20f, 2);
 
             _globalSituation = new VesselRanges.Situation(
                 load: PreSettings.GlobalRange * 1000,
-                unload: PreSettings.GlobalRange * 1000 * 1.10f, 
-                pack: PreSettings.GlobalRange * 1000 * 1.15f,
-                unpack: PreSettings.GlobalRange * 1000 * 1.05f);
+                unload: PreSettings.GlobalRange * 1000 * 1.05f, 
+                pack: PreSettings.GlobalRange * 1000 * 1.10f,
+                unpack: PreSettings.GlobalRange * 1000 * 0.99f);
             _landedSituation = new VesselRanges.Situation(
                 load: PreSettings.RangeForLandedVessels * 1000,
-                unload: PreSettings.RangeForLandedVessels * 1000 * 1.10f,
-                pack: PreSettings.RangeForLandedVessels * 1000 * 1.15f,
-                unpack: PreSettings.RangeForLandedVessels * 1000 * 1.05f);
+                unload: PreSettings.RangeForLandedVessels * 1000 * 1.05f,
+                pack: PreSettings.RangeForLandedVessels * 1000 * 1.10f,
+                unpack: PreSettings.RangeForLandedVessels * 1000 * 0.99f);
 
             _baseRanges = new VesselRanges
             {
@@ -143,7 +168,7 @@ namespace PhysicsRangeExtender
             }
             catch (Exception e)
             {
-                Debug.Log("[PhysicsRangeExtender]:Failed to Load Physics Distance -" + e);
+                Debug.Log("== PhysicsRangeExtender : Failed to Load Physics Distance -" + e);
             }
         }
     }
