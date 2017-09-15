@@ -18,7 +18,7 @@ namespace PhysicsRangeExtender
             set
             {
                 _enabled = value;
-                ApplyRangesToVessels(_enabled);
+                ApplyRangesToVessels(_enabled, true);
             }
         }
 
@@ -29,6 +29,8 @@ namespace PhysicsRangeExtender
             GameEvents.onVesselCreate.Add(ApplyPhysRange);
             GameEvents.onVesselLoaded.Add(ApplyPhysRange);
             GameEvents.onVesselSwitching.Add(ApplyPhysRange);
+            GameEvents.onVesselGoOffRails.Add(ApplyPhysRange);
+            GameEvents.onVesselGoOffRails.Add(ApplyPhysRange);
         }
 
         void OnDestroy()
@@ -36,17 +38,19 @@ namespace PhysicsRangeExtender
             GameEvents.onVesselCreate.Remove(ApplyPhysRange);
             GameEvents.onVesselLoaded.Remove(ApplyPhysRange);
             GameEvents.onVesselSwitching.Remove(ApplyPhysRange);
+            GameEvents.onVesselGoOffRails.Remove(ApplyPhysRange);
+            GameEvents.onVesselGoOffRails.Remove(ApplyPhysRange);
         }
 
 
         private void ApplyPhysRange(Vessel data0, Vessel data1)
         {
-            _unloadDueToReferenceFrameApplied = false;
             ApplyRangesToVessels(Enabled);
         }
 
         private void ApplyPhysRange(Vessel data)
         {
+
             ApplyRangesToVessels(Enabled);
         }
 
@@ -57,22 +61,7 @@ namespace PhysicsRangeExtender
 
         private void AvoidReferenceFrameChangeIssues()
         {
-            var safetyMargin = 0.90f;
-
-            if (FlightGlobals.ActiveVessel == null ||
-                FlightGlobals.ActiveVessel.LandedOrSplashed ||
-                FlightGlobals.ActiveVessel.orbit == null ||
-                FlightGlobals.ActiveVessel.orbit.referenceBody == null)
-                
-            {
-                return;
-            }
-
-            var altitudeAtPos =
-                (double) FlightGlobals.getAltitudeAtPos(FlightGlobals.ActiveVessel.transform.position,
-                    FlightGlobals.ActiveVessel.orbit.referenceBody);
-
-            if ((altitudeAtPos / FlightGlobals.ActiveVessel.orbit.referenceBody.inverseRotThresholdAltitude) > safetyMargin)
+            if (!ShouldLandedVesselsBeLoaded())
             {
                 if (!_unloadDueToReferenceFrameApplied)
                 {
@@ -85,7 +74,34 @@ namespace PhysicsRangeExtender
                 UpdateRanges();
                 _unloadDueToReferenceFrameApplied = false;
             }
+        }
 
+        private static bool ShouldLandedVesselsBeLoaded()
+        {
+            var safetyMargin = 0.90f;
+
+            if (FlightGlobals.ActiveVessel == null ||
+                FlightGlobals.ActiveVessel.LandedOrSplashed ||
+                FlightGlobals.ActiveVessel.orbit == null ||
+                FlightGlobals.ActiveVessel.orbit.referenceBody == null)
+
+            {
+                return true;
+            }
+
+            var altitudeAtPos =
+                (double) FlightGlobals.getAltitudeAtPos(FlightGlobals.ActiveVessel.transform.position,
+                    FlightGlobals.ActiveVessel.orbit.referenceBody);
+
+            if ((altitudeAtPos / FlightGlobals.ActiveVessel.orbit.referenceBody.inverseRotThresholdAltitude) >
+                safetyMargin)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
 
         private void UnloadLandedVessels()
@@ -119,7 +135,7 @@ namespace PhysicsRangeExtender
             }
         }
 
-        public static void UpdateRanges()
+        public static void UpdateRanges(bool updatingFromUi = false)
         {
             Debug.Log("== PhysicsRangeExtender :  Updating ranges");
             FloatingOrigin.fetch.threshold = Mathf.Pow(PreSettings.GlobalRange * 1.20f, 2);
@@ -135,20 +151,20 @@ namespace PhysicsRangeExtender
                 pack: PreSettings.RangeForLandedVessels * 1000 * 1.10f,
                 unpack: PreSettings.RangeForLandedVessels * 1000 * 0.99f);
 
-            _baseRanges = new VesselRanges
+        _baseRanges = new VesselRanges
             {
                 escaping = _globalSituation,
                 flying = _globalSituation,
                 landed = _landedSituation,
                 orbit = _globalSituation,
-                prelaunch = _globalSituation,
+                prelaunch = _landedSituation,
                 splashed = _globalSituation,
                 subOrbital = _globalSituation
             };
-            ApplyRangesToVessels(_enabled);
+            ApplyRangesToVessels(_enabled,updatingFromUi);
         }
 
-        private static void ApplyRangesToVessels(bool enabled)
+        private static void ApplyRangesToVessels(bool modEnabled, bool updatingFromUi = false)
         {
             try
             {
@@ -156,9 +172,19 @@ namespace PhysicsRangeExtender
 
                 for (var i = 0; i < vesselsCount; i++)
                 {
-                    if (enabled)
+                    if (modEnabled )
                     {
-                        FlightGlobals.Vessels[i].vesselRanges = new VesselRanges(_baseRanges);
+                        if(FlightGlobals.Vessels[i].LandedOrSplashed && !ShouldLandedVesselsBeLoaded())
+                        {
+                            continue;
+                        }
+                        if (VesselOrbitingWhileUpdatingRangeFromUi(updatingFromUi, FlightGlobals.Vessels[i]))
+                        {
+                            continue;
+                        }
+
+                        FlightGlobals.Vessels[i].vesselRanges = new VesselRanges(_baseRanges);     
+                                                     
                     }
                     else
                     {
@@ -170,6 +196,11 @@ namespace PhysicsRangeExtender
             {
                 Debug.Log("== PhysicsRangeExtender : Failed to Load Physics Distance -" + e);
             }
+        }
+
+        private static bool VesselOrbitingWhileUpdatingRangeFromUi( bool updatingFromUi, Vessel vessel)
+        {
+            return updatingFromUi && !vessel.LandedOrSplashed;
         }
     }
 }

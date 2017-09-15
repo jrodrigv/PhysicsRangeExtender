@@ -138,7 +138,7 @@ namespace PhysicsRangeExtender
             }
 
             PreSettings.SaveConfig();
-            PhysicsRangeExtender.UpdateRanges();
+            PhysicsRangeExtender.UpdateRanges(true);
         }
 
         private void DrawLandedVesselRange(float line)
