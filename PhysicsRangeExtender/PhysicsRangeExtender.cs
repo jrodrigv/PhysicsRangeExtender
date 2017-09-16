@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace PhysicsRangeExtender
 {
-    [KSPAddon(KSPAddon.Startup.FlightAndKSC, false)]
+    [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class PhysicsRangeExtender : MonoBehaviour
     {
         private static VesselRanges _baseRanges;

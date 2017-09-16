@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace PhysicsRangeExtender
 {
-    [KSPAddon(KSPAddon.Startup.EveryScene, false)]
+    [KSPAddon(KSPAddon.Startup.Instantly, false)]
     public class PreSettings : MonoBehaviour
     {
         public static string SettingsConfigUrl = "GameData/PhysicsRangeExtender/settings.cfg";

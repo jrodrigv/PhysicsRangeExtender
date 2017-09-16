@@ -211,7 +211,7 @@ namespace PhysicsRangeExtender
             {
                 Texture buttonTexture = GameDatabase.Instance.GetTexture("PhysicsRangeExtender/Textures/icon", false);
                 ApplicationLauncher.Instance.AddModApplication(EnableGui, DisableGui, Dummy, Dummy, Dummy, Dummy,
-                    ApplicationLauncher.AppScenes.FLIGHT, buttonTexture);
+                    ApplicationLauncher.AppScenes.ALWAYS, buttonTexture);
                 HasAddedButton = true;
             }
         }
