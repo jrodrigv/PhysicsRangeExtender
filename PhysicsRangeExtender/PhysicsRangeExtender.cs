@@ -11,6 +11,7 @@ namespace PhysicsRangeExtender
         private static VesselRanges.Situation _landedSituation;
 
         private static bool _enabled = true;
+        private static bool _forceRanges = false;
         private static bool _unloadDueToReferenceFrameApplied;
         public static bool Enabled
         {
@@ -22,6 +23,15 @@ namespace PhysicsRangeExtender
             }
         }
 
+        public static bool ForceRanges
+        {
+            get => _forceRanges;
+            set
+            {
+                _forceRanges = value;
+                ApplyRangesToVessels(_enabled, false);
+            }
+        }
         void Start()
         {
             UpdateRanges();
@@ -56,7 +66,10 @@ namespace PhysicsRangeExtender
 
         void FixedUpdate()
         {
-            AvoidReferenceFrameChangeIssues();
+            if (!ForceRanges)
+            {
+                AvoidReferenceFrameChangeIssues(); 
+            }
         }
 
         private void AvoidReferenceFrameChangeIssues()
@@ -76,6 +89,10 @@ namespace PhysicsRangeExtender
             }
         }
 
+        /// <summary>
+        /// This method will avoid landed vessels to be destroyed due to changes on the referencial frame (inertial vs rotation) when the active vessel is going suborbital
+        /// </summary>
+        /// <returns> if landed vessel should be loaded</returns>
         private static bool ShouldLandedVesselsBeLoaded()
         {
             var safetyMargin = 0.90f;
@@ -104,10 +121,14 @@ namespace PhysicsRangeExtender
             }
         }
 
+        /// <summary>
+        /// This method will reduce the load/unload distances using a closer range to avoid issues.
+        /// </summary>
         private void UnloadLandedVessels()
         {
             var vesselsCount = FlightGlobals.Vessels.Count;
-
+            ScreenMessages.PostScreenMessage(
+                "[PhysicsRangeExtender] Unloading landed vessels during active orbital fly.", 3f, ScreenMessageStyle.UPPER_CENTER);
             for (var i = 0; i < vesselsCount; i++)
             {
                 if (FlightGlobals.Vessels[i].LandedOrSplashed)
@@ -137,7 +158,7 @@ namespace PhysicsRangeExtender
 
         public static void UpdateRanges(bool updatingFromUi = false)
         {
-            Debug.Log("== PhysicsRangeExtender :  Updating ranges");
+            Debug.Log("[PhysicsRangeExtender]:  Updating ranges");
             FloatingOrigin.fetch.threshold = Mathf.Pow(PreSettings.GlobalRange * 1.20f, 2);
 
             _globalSituation = new VesselRanges.Situation(
@@ -174,13 +195,22 @@ namespace PhysicsRangeExtender
                 {
                     if (modEnabled )
                     {
-                        if(FlightGlobals.Vessels[i].LandedOrSplashed && !ShouldLandedVesselsBeLoaded())
+                        if (!ForceRanges)
                         {
-                            continue;
-                        }
-                        if (VesselOrbitingWhileUpdatingRangeFromUi(updatingFromUi, FlightGlobals.Vessels[i]))
-                        {
-                            continue;
+                            // check to avoid landed vessels to be destroyec when the active vessel is sub-orbital
+                            if (FlightGlobals.Vessels[i].LandedOrSplashed && !ShouldLandedVesselsBeLoaded())
+                            {
+                                ScreenMessages.PostScreenMessage(
+                                    "[PhysicsRangeExtender] Landed vessels will not be loaded during active orbital fly.", 3f, ScreenMessageStyle.UPPER_CENTER);
+                                continue;
+                            }
+                            // 
+                            if (VesselOrbitingWhileUpdatingRangeFromUi(updatingFromUi, FlightGlobals.Vessels[i]))
+                            {
+                                ScreenMessages.PostScreenMessage(
+                                    "[PhysicsRangeExtender]: Please reload the game to apply the new range to all vessels.", 3f, ScreenMessageStyle.UPPER_CENTER);
+                                continue;
+                            } 
                         }
 
                         FlightGlobals.Vessels[i].vesselRanges = new VesselRanges(_baseRanges);     
@@ -194,13 +224,19 @@ namespace PhysicsRangeExtender
             }
             catch (Exception e)
             {
-                Debug.Log("== PhysicsRangeExtender : Failed to Load Physics Distance -" + e);
+                Debug.Log("[PhysicsRangeExtender]: Failed to Load Physics Distance -" + e);
             }
         }
 
+        /// <summary>
+        /// This method will avoid de-orbiting unloaded vessels when a user is extending the range using the UI and orbiting vessels are getting loaded.
+        /// </summary>
+        /// <param name="updatingFromUi"></param>
+        /// <param name="vessel"></param>
+        /// <returns></returns>
         private static bool VesselOrbitingWhileUpdatingRangeFromUi( bool updatingFromUi, Vessel vessel)
         {
-            return updatingFromUi && !vessel.LandedOrSplashed;
+            return !vessel.isActiveVessel && updatingFromUi && !vessel.LandedOrSplashed;
         }
     }
 }

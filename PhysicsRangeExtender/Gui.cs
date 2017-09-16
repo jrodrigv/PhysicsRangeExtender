@@ -75,7 +75,10 @@ namespace PhysicsRangeExtender
                 line++;
                 line++;
                 DrawSaveButton(line);
-                line++;  
+                line++;
+                line++;
+                DrawForceCheckBox(line);
+                line++;
                 DrawWarning(line);
             }
 
@@ -120,6 +123,23 @@ namespace PhysicsRangeExtender
             var saveRect = new Rect(LeftIndent, ContentTop + line * entryHeight, contentWidth / 2, entryHeight);
             if (GUI.Button(saveRect, "Apply"))
                 Apply();
+        }
+
+        private void DrawForceCheckBox(float line)
+        {
+            var saveRect = new Rect(LeftIndent, ContentTop + line * entryHeight, contentWidth , entryHeight);
+
+           
+            if (PhysicsRangeExtender.ForceRanges)
+            {
+                if (GUI.Button(saveRect, "Disable unsafe range update"))
+                    PhysicsRangeExtender.ForceRanges = false;
+            }
+            else
+            {
+                if (GUI.Button(saveRect, "Force unsafe range update"))
+                    PhysicsRangeExtender.ForceRanges = true;
+            }
         }
 
         private void Apply()
@@ -199,13 +219,13 @@ namespace PhysicsRangeExtender
         private void EnableGui()
         {
             GuiEnabled = true;
-            Debug.Log("Showing PRE GUI");
+            Debug.Log("[PhysicsRangeExtender]: Showing PRE GUI");
         }
 
         private void DisableGui()
         {
             GuiEnabled = false;
-            Debug.Log("Hiding PRE GUI");
+            Debug.Log("[PhysicsRangeExtender]: Hiding PRE GUI");
         }
 
         private void Dummy()
