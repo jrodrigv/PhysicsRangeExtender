@@ -106,9 +106,11 @@ namespace PhysicsRangeExtender
 
         private void DrawGlobalVesselRange(float line)
         {
-            var leftLabel = new GUIStyle();
-            leftLabel.alignment = TextAnchor.UpperLeft;
-            leftLabel.normal.textColor = Color.white;
+            var leftLabel = new GUIStyle
+            {
+                alignment = TextAnchor.UpperLeft,
+                normal = {textColor = Color.white}
+            };
 
             GUI.Label(new Rect(LeftIndent, ContentTop + line * entryHeight, 60, entryHeight), "Global range:",
                 leftLabel);
@@ -144,14 +146,12 @@ namespace PhysicsRangeExtender
 
         private void Apply()
         {
-            int parseRangeForLanded;
-            int parseGlobalRange;
-            if (int.TryParse(_guiLocalRangeForLandedVessels, out parseRangeForLanded))
+            if (int.TryParse(_guiLocalRangeForLandedVessels, out var parseRangeForLanded))
             {
                 PreSettings.RangeForLandedVessels = parseRangeForLanded;
                 _guiLocalRangeForLandedVessels = PreSettings.RangeForLandedVessels.ToString();
             }
-            if (int.TryParse(_guiGlobalRangeForVessels, out parseGlobalRange))
+            if (int.TryParse(_guiGlobalRangeForVessels, out var parseGlobalRange))
             {
                 PreSettings.GlobalRange = parseGlobalRange;
                 _guiGlobalRangeForVessels = PreSettings.GlobalRange.ToString();
@@ -163,9 +163,11 @@ namespace PhysicsRangeExtender
 
         private void DrawLandedVesselRange(float line)
         {
-            var leftLabel = new GUIStyle();
-            leftLabel.alignment = TextAnchor.UpperLeft;
-            leftLabel.normal.textColor = Color.white;
+            var leftLabel = new GUIStyle
+            {
+                alignment = TextAnchor.UpperLeft,
+                normal = {textColor = Color.white}
+            };
 
             GUI.Label(new Rect(LeftIndent, ContentTop + line * entryHeight, 60, entryHeight), "Landed range:",
                 leftLabel);

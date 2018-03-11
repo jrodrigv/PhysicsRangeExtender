@@ -11,7 +11,7 @@ namespace PhysicsRangeExtender
         private static VesselRanges.Situation _landedSituation;
 
         private static bool _enabled = true;
-        private static bool _forceRanges = false;
+        private static bool _forceRanges;
         private static bool _unloadDueToReferenceFrameApplied;
         public static bool Enabled
         {
@@ -29,7 +29,7 @@ namespace PhysicsRangeExtender
             set
             {
                 _forceRanges = value;
-                ApplyRangesToVessels(_enabled, false);
+                ApplyRangesToVessels(_enabled);
             }
         }
         void Start()
