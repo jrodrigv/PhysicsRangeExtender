@@ -13,6 +13,12 @@ namespace PhysicsRangeExtender
         private static bool _enabled = true;
         private static bool _forceRanges;
         private static bool _unloadDueToReferenceFrameApplied;
+
+        private static PQSData originalPQSData;
+        private static bool _extendTerrainDistance = true;
+
+
+
         public static bool Enabled
         {
             get => _enabled;
@@ -32,10 +38,24 @@ namespace PhysicsRangeExtender
                 ApplyRangesToVessels(_enabled);
             }
         }
+
+     
+        public static bool ExtendTerrainDistance
+        {
+            get => _extendTerrainDistance;
+            set
+            {
+                _extendTerrainDistance = value;
+                ApplyRangesToVessels(_enabled);
+            }
+        }
+
         void Start()
         {
             UpdateRanges();
- 
+
+            UpdateTerrainLoadingDistance();
+
             GameEvents.onVesselCreate.Add(ApplyPhysRange);
             GameEvents.onVesselLoaded.Add(ApplyPhysRange);
             GameEvents.onVesselSwitching.Add(ApplyPhysRange);
@@ -68,7 +88,34 @@ namespace PhysicsRangeExtender
         {
             if (!ForceRanges)
             {
-                AvoidReferenceFrameChangeIssues(); 
+                AvoidReferenceFrameChangeIssues();
+            }
+        }
+
+        private void UpdateTerrainLoadingDistance()
+        {
+
+            if (ExtendTerrainDistance)
+            {
+                originalPQSData = new PQSData()
+                {
+                    horizonDistance = FlightGlobals.currentMainBody.pqsController.horizonDistance,
+                    visRadSeaLevelValue = FlightGlobals.currentMainBody.pqsController.visRadSeaLevelValue,
+                    collapseSeaLevelValue = FlightGlobals.currentMainBody.pqsController.collapseSeaLevelValue
+                };
+
+                var pqs = FlightGlobals.currentMainBody.pqsController;
+                pqs.horizonDistance = PreSettings.RangeForLandedVessels * 1000;
+                pqs.visRadSeaLevelValue = 500;
+                pqs.collapseSeaLevelValue = 500;
+            }
+            else
+            {
+
+                var pqs = FlightGlobals.currentMainBody.pqsController;
+                pqs.horizonDistance = originalPQSData.horizonDistance;
+                pqs.visRadSeaLevelValue = originalPQSData.visRadSeaLevelValue;
+                pqs.collapseSeaLevelValue = originalPQSData.collapseSeaLevelValue;
             }
         }
 
@@ -159,9 +206,9 @@ namespace PhysicsRangeExtender
         public static void UpdateRanges(bool updatingFromUi = false)
         {
             Debug.Log("[PhysicsRangeExtender]:  Updating ranges");
-            FloatingOrigin.fetch.threshold = Mathf.Pow(PreSettings.GlobalRange * 1.20f, 2);
+            FloatingOrigin.fetch.threshold = Mathf.Pow(PreSettings.GlobalRange * 1000 * 1.20f, 2);
 
-            _globalSituation = new VesselRanges.Situation(
+           _globalSituation = new VesselRanges.Situation(
                 load: PreSettings.GlobalRange * 1000,
                 unload: PreSettings.GlobalRange * 1000 * 1.05f, 
                 pack: PreSettings.GlobalRange * 1000 * 1.10f,
@@ -172,14 +219,14 @@ namespace PhysicsRangeExtender
                 pack: PreSettings.RangeForLandedVessels * 1000 * 1.10f,
                 unpack: PreSettings.RangeForLandedVessels * 1000 * 0.99f);
 
-        _baseRanges = new VesselRanges
+            _baseRanges = new VesselRanges
             {
                 escaping = _globalSituation,
                 flying = _globalSituation,
                 landed = _landedSituation,
                 orbit = _globalSituation,
                 prelaunch = _landedSituation,
-                splashed = _globalSituation,
+                splashed = _landedSituation,
                 subOrbital = _globalSituation
             };
             ApplyRangesToVessels(_enabled,updatingFromUi);

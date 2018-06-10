@@ -73,9 +73,10 @@ namespace PhysicsRangeExtender
                 line++;
                 DrawGlobalVesselRange(line);
                 line++;
-                line++;
                 DrawSaveButton(line);
                 line++;
+                line++;
+                DrawExtendTerrainLoadingDistanceCheckBox(line);
                 line++;
                 DrawForceCheckBox(line);
                 line++;
@@ -144,6 +145,23 @@ namespace PhysicsRangeExtender
             }
         }
 
+        private void DrawExtendTerrainLoadingDistanceCheckBox(float line)
+        {
+            var saveRect = new Rect(LeftIndent, ContentTop + line * entryHeight, contentWidth, entryHeight);
+
+
+            if (PhysicsRangeExtender.ExtendTerrainDistance)
+            {
+                if (GUI.Button(saveRect, "Disable terrain loading distance"))
+                    PhysicsRangeExtender.ExtendTerrainDistance = false;
+            }
+            else
+            {
+                if (GUI.Button(saveRect, "Enable terrain loading distance"))
+                    PhysicsRangeExtender.ExtendTerrainDistance = true;
+            }
+        }
+
         private void Apply()
         {
             if (int.TryParse(_guiLocalRangeForLandedVessels, out var parseRangeForLanded))
@@ -169,7 +187,7 @@ namespace PhysicsRangeExtender
                 normal = {textColor = Color.white}
             };
 
-            GUI.Label(new Rect(LeftIndent, ContentTop + line * entryHeight, 60, entryHeight), "Landed range:",
+            GUI.Label(new Rect(LeftIndent, ContentTop + line * entryHeight, 90, entryHeight), "Landed/Splashed range:",
                 leftLabel);
             float textFieldWidth = 42;
             var fwdFieldRect = new Rect(LeftIndent + contentWidth - textFieldWidth - 3 * _incrButtonWidth,

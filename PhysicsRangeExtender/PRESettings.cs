@@ -10,6 +10,7 @@ namespace PhysicsRangeExtender
 
         public static int RangeForLandedVessels { get; set; }
         public static int GlobalRange { get; set; }
+        public static bool ExtendedTerrain { get; set; }
 
         void Awake()
         {
@@ -28,7 +29,7 @@ namespace PhysicsRangeExtender
                 ConfigNode settings = fileNode.GetNode("PreSettings");
                 RangeForLandedVessels = int.Parse(settings.GetValue("RangeForLandedVessels"));
                 GlobalRange = int.Parse(settings.GetValue("GlobalRange"));
-                
+                ExtendedTerrain = bool.Parse(settings.GetValue("ExtendedTerrain"));
             }
             catch (Exception ex)
             {
@@ -47,6 +48,7 @@ namespace PhysicsRangeExtender
 
                 settings.SetValue("RangeForLandedVessels", RangeForLandedVessels);
                 settings.SetValue("GlobalRange", GlobalRange);
+                settings.SetValue("ExtendedTerrain", ExtendedTerrain);
                 fileNode.Save(SettingsConfigUrl);
             }
             catch (Exception ex)
