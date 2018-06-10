@@ -149,17 +149,18 @@ namespace PhysicsRangeExtender
         {
             var saveRect = new Rect(LeftIndent, ContentTop + line * entryHeight, contentWidth, entryHeight);
 
-
             if (PhysicsRangeExtender.ExtendTerrainDistance)
             {
                 if (GUI.Button(saveRect, "Disable terrain loading distance"))
-                    PhysicsRangeExtender.ExtendTerrainDistance = false;
+                    PreSettings.ExtendedTerrain = false;
             }
             else
             {
                 if (GUI.Button(saveRect, "Enable terrain loading distance"))
-                    PhysicsRangeExtender.ExtendTerrainDistance = true;
+                    PreSettings.ExtendedTerrain = true;
             }
+            PreSettings.SaveConfig();
+            PhysicsRangeExtender.UpdateTerrainLoadingDistance();
         }
 
         private void Apply()

@@ -92,10 +92,10 @@ namespace PhysicsRangeExtender
             }
         }
 
-        private void UpdateTerrainLoadingDistance()
+        public static void UpdateTerrainLoadingDistance()
         {
 
-            if (ExtendTerrainDistance)
+            if (PreSettings.ExtendedTerrain)
             {
                 originalPQSData = new PQSData()
                 {
