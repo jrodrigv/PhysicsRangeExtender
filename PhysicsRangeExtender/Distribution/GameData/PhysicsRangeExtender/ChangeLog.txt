@@ -1,3 +1,9 @@
+= v1.7.0
+- Recompiled and upgraded for KSP 1.4.3
+- Adding option to extend terrain loading distance (thanks to Gedas)
+- Flickering fixed at 99% after applying a dynamic update of the near clip plane of the main camera.
+- Landed range removed, only one range is needed now :)
+
 = v1.6.0
 - Recompiled and upgraded for KSP 1.4
 

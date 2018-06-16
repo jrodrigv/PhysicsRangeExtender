@@ -7,8 +7,6 @@ namespace PhysicsRangeExtender
     public class PreSettings : MonoBehaviour
     {
         public static string SettingsConfigUrl = "GameData/PhysicsRangeExtender/settings.cfg";
-
-        public static int RangeForLandedVessels { get; set; }
         public static int GlobalRange { get; set; }
         public static bool ExtendedTerrain { get; set; }
 
@@ -27,7 +25,6 @@ namespace PhysicsRangeExtender
                 if (!fileNode.HasNode("PreSettings")) return;
 
                 ConfigNode settings = fileNode.GetNode("PreSettings");
-                RangeForLandedVessels = int.Parse(settings.GetValue("RangeForLandedVessels"));
                 GlobalRange = int.Parse(settings.GetValue("GlobalRange"));
                 ExtendedTerrain = bool.Parse(settings.GetValue("ExtendedTerrain"));
             }
@@ -46,7 +43,6 @@ namespace PhysicsRangeExtender
                 if (!fileNode.HasNode("PreSettings")) return;
                 ConfigNode settings = fileNode.GetNode("PreSettings");
 
-                settings.SetValue("RangeForLandedVessels", RangeForLandedVessels);
                 settings.SetValue("GlobalRange", GlobalRange);
                 settings.SetValue("ExtendedTerrain", ExtendedTerrain);
                 fileNode.Save(SettingsConfigUrl);

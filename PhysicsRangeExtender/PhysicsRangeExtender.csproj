@@ -51,6 +51,7 @@
     <Compile Include="PQSData.cs" />
     <Compile Include="PreSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TerrainExtender.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Distribution\GameData\PhysicsRangeExtender\LICENSE.txt" />

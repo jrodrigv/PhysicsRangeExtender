@@ -1,9 +1,9 @@
 ﻿namespace PhysicsRangeExtender
 {
-    internal class PQSData
+    internal class PqsData
     {
-        public double horizonDistance { get; set; }
-        public double visRadSeaLevelValue { get; set; }
-        public double collapseSeaLevelValue { get; set; }
+        public double HorizonDistance { get; set; }
+        public double VisRadSeaLevelValue { get; set; }
+        public double CollapseSeaLevelValue { get; set; }
     }
 }

@@ -23,8 +23,6 @@ namespace PhysicsRangeExtender
         private bool _gameUiToggle;
         private string _guiGlobalRangeForVessels = String.Empty;
 
-
-        private string _guiLocalRangeForLandedVessels = String.Empty;
         private float _windowHeight = 250;
         private Rect _windowRect;
 
@@ -43,7 +41,6 @@ namespace PhysicsRangeExtender
             GameEvents.onHideUI.Add(GameUiDisable);
             GameEvents.onShowUI.Add(GameUiEnable);
             _gameUiToggle = true;
-            _guiLocalRangeForLandedVessels = PreSettings.RangeForLandedVessels.ToString();
             _guiGlobalRangeForVessels = PreSettings.GlobalRange.ToString();
         }
 
@@ -62,26 +59,16 @@ namespace PhysicsRangeExtender
 
             DrawTitle();
             line++;
-            DrawModStateButton(line);
-
-
-            if (PhysicsRangeExtender.Enabled)
-            {
-                line++;
-                line++;
-                DrawLandedVesselRange(line);
-                line++;
-                DrawGlobalVesselRange(line);
-                line++;
-                DrawSaveButton(line);
-                line++;
-                line++;
-                DrawExtendTerrainLoadingDistanceCheckBox(line);
-                line++;
-                DrawForceCheckBox(line);
-                line++;
-                DrawWarning(line);
-            }
+            DrawGlobalVesselRange(line);
+            line++;
+            DrawSaveButton(line);
+            line++;
+            line++;
+            DrawExtendTerrainLoadingDistanceCheckBox(line);
+            line++;
+            line++;
+            DrawForceCheckBox(line);
+            
 
             _windowHeight = ContentTop + line * entryHeight + entryHeight + entryHeight;
             _windowRect.height = _windowHeight;
@@ -117,14 +104,15 @@ namespace PhysicsRangeExtender
                 leftLabel);
             float textFieldWidth = 42;
             var fwdFieldRect = new Rect(LeftIndent + contentWidth - textFieldWidth - 3 * _incrButtonWidth,
-                ContentTop + line * entryHeight, textFieldWidth, entryHeight);
+                  ContentTop + line * entryHeight, textFieldWidth, entryHeight);
             _guiGlobalRangeForVessels = GUI.TextField(fwdFieldRect, _guiGlobalRangeForVessels);
+          
         }
 
         private void DrawSaveButton(float line)
         {
             var saveRect = new Rect(LeftIndent, ContentTop + line * entryHeight, contentWidth / 2, entryHeight);
-            if (GUI.Button(saveRect, "Apply"))
+            if (GUI.Button(saveRect, "Apply new range"))
                 Apply();
         }
 
@@ -149,27 +137,28 @@ namespace PhysicsRangeExtender
         {
             var saveRect = new Rect(LeftIndent, ContentTop + line * entryHeight, contentWidth, entryHeight);
 
-            if (PhysicsRangeExtender.ExtendTerrainDistance)
+            if (PreSettings.ExtendedTerrain)
             {
                 if (GUI.Button(saveRect, "Disable terrain loading distance"))
+                {
                     PreSettings.ExtendedTerrain = false;
+                    PreSettings.SaveConfig();
+                }
+                   
             }
             else
             {
                 if (GUI.Button(saveRect, "Enable terrain loading distance"))
+                {
                     PreSettings.ExtendedTerrain = true;
+                    PreSettings.SaveConfig();
+                }          
             }
-            PreSettings.SaveConfig();
-            PhysicsRangeExtender.UpdateTerrainLoadingDistance();
+          
         }
 
         private void Apply()
         {
-            if (int.TryParse(_guiLocalRangeForLandedVessels, out var parseRangeForLanded))
-            {
-                PreSettings.RangeForLandedVessels = parseRangeForLanded;
-                _guiLocalRangeForLandedVessels = PreSettings.RangeForLandedVessels.ToString();
-            }
             if (int.TryParse(_guiGlobalRangeForVessels, out var parseGlobalRange))
             {
                 PreSettings.GlobalRange = parseGlobalRange;
@@ -178,37 +167,6 @@ namespace PhysicsRangeExtender
 
             PreSettings.SaveConfig();
             PhysicsRangeExtender.UpdateRanges(true);
-        }
-
-        private void DrawLandedVesselRange(float line)
-        {
-            var leftLabel = new GUIStyle
-            {
-                alignment = TextAnchor.UpperLeft,
-                normal = {textColor = Color.white}
-            };
-
-            GUI.Label(new Rect(LeftIndent, ContentTop + line * entryHeight, 90, entryHeight), "Landed/Splashed range:",
-                leftLabel);
-            float textFieldWidth = 42;
-            var fwdFieldRect = new Rect(LeftIndent + contentWidth - textFieldWidth - 3 * _incrButtonWidth,
-                ContentTop + line * entryHeight, textFieldWidth, entryHeight);
-            _guiLocalRangeForLandedVessels = GUI.TextField(fwdFieldRect, _guiLocalRangeForLandedVessels);
-        }
-
-        private void DrawModStateButton(float line)
-        {
-            var saveRect = new Rect(LeftIndent, ContentTop + line * entryHeight, _contentWidth / 2, entryHeight);
-            if (PhysicsRangeExtender.Enabled)
-            {
-                if (GUI.Button(saveRect, "Disable mod"))
-                    PhysicsRangeExtender.Enabled = false;
-            }
-            else
-            {
-                if (GUI.Button(saveRect, "Enable mod"))
-                    PhysicsRangeExtender.Enabled = true;
-            }
         }
 
         private void DrawTitle()
