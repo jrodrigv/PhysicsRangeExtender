@@ -64,9 +64,6 @@ namespace PhysicsRangeExtender
             DrawSaveButton(line);
             line++;
             line++;
-            DrawExtendTerrainLoadingDistanceCheckBox(line);
-            line++;
-            line++;
             DrawForceCheckBox(line);
             
 
@@ -113,30 +110,6 @@ namespace PhysicsRangeExtender
                 if (GUI.Button(saveRect, "Force unsafe range update"))
                     PhysicsRangeExtender.ForceRanges = true;
             }
-        }
-
-        private void DrawExtendTerrainLoadingDistanceCheckBox(float line)
-        {
-            var saveRect = new Rect(LeftIndent, ContentTop + line * entryHeight, contentWidth, entryHeight);
-
-            if (PreSettings.ExtendedTerrain)
-            {
-                if (GUI.Button(saveRect, "Disable terrain loading distance"))
-                {
-                    PreSettings.ExtendedTerrain = false;
-                    PreSettings.SaveConfig();
-                }
-                   
-            }
-            else
-            {
-                if (GUI.Button(saveRect, "Enable terrain loading distance"))
-                {
-                    PreSettings.ExtendedTerrain = true;
-                    PreSettings.SaveConfig();
-                }          
-            }
-          
         }
 
         private void Apply()

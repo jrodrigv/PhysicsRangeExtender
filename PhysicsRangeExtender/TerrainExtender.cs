@@ -24,9 +24,9 @@ namespace PhysicsRangeExtender
         private void ExtendTerrainDistance()
         {
             var pqs = FlightGlobals.currentMainBody.pqsController;
-            pqs.horizonDistance = PreSettings.GlobalRange;
-            pqs.maxDetailDistance = PreSettings.GlobalRange;
-            pqs.minDetailDistance = PreSettings.GlobalRange;
+            pqs.horizonDistance = PreSettings.GlobalRange * 1000f;
+            pqs.maxDetailDistance = PreSettings.GlobalRange * 1000f;
+            pqs.minDetailDistance = PreSettings.GlobalRange * 1000f;
             pqs.visRadSeaLevelValue = 200;
             pqs.collapseSeaLevelValue = 200;
 
@@ -56,50 +56,25 @@ namespace PhysicsRangeExtender
                 }
             }
         }
-        private void DisableExtendedTerrain()
-        {
-            var pqs = FlightGlobals.currentMainBody.pqsController;
-            pqs.horizonDistance = _originalPqsData.HorizonDistance;
-            pqs.visRadSeaLevelValue = _originalPqsData.VisRadSeaLevelValue;
-            pqs.collapseSeaLevelValue = _originalPqsData.CollapseSeaLevelValue;
-        }
+       
 
-        void Start()
-        {
-            _originalPqsData = new PqsData()
-            {
-                HorizonDistance = FlightGlobals.currentMainBody.pqsController.horizonDistance,
-                VisRadSeaLevelValue = FlightGlobals.currentMainBody.pqsController.visRadSeaLevelValue,
-                CollapseSeaLevelValue = FlightGlobals.currentMainBody.pqsController.collapseSeaLevelValue
-            };
-        }
 
         void FixedUpdate() => Apply();
         void LateUpdate() => Apply();
 
         private void Update()
         {
-            if (PreSettings.ExtendedTerrain)
-            {
-                ExtendTerrainDistance();
-                EaseLoadingForExtendedRange();
-            }
-            else
-            {
-                DisableExtendedTerrain();
-            }
+            if (!PreSettings.ConfigLoaded) return;
+
+            ExtendTerrainDistance();
+            EaseLoadingForExtendedRange();
         }
 
         private void Apply()
         {
-            if (PreSettings.ExtendedTerrain)
-            {
-                ExtendTerrainDistance();
-            }
-            else
-            {
-                DisableExtendedTerrain();
-            }
+            if (!PreSettings.ConfigLoaded) return;
+
+            ExtendTerrainDistance();
         }
 
         private void EaseLoadingForExtendedRange()

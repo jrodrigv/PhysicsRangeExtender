@@ -7,12 +7,13 @@ namespace PhysicsRangeExtender
     public class PreSettings : MonoBehaviour
     {
         public static string SettingsConfigUrl = "GameData/PhysicsRangeExtender/settings.cfg";
-        public static int GlobalRange { get; set; }
-        public static bool ExtendedTerrain { get; set; }
+        public static int GlobalRange { get; set; } 
 
+        public static bool ConfigLoaded { get; set; } = false;
         void Awake()
         {
             LoadConfig();
+            ConfigLoaded = true;
         }
 
         public static void LoadConfig()
@@ -26,7 +27,6 @@ namespace PhysicsRangeExtender
 
                 ConfigNode settings = fileNode.GetNode("PreSettings");
                 GlobalRange = int.Parse(settings.GetValue("GlobalRange"));
-                ExtendedTerrain = bool.Parse(settings.GetValue("ExtendedTerrain"));
             }
             catch (Exception ex)
             {
@@ -44,7 +44,6 @@ namespace PhysicsRangeExtender
                 ConfigNode settings = fileNode.GetNode("PreSettings");
 
                 settings.SetValue("GlobalRange", GlobalRange);
-                settings.SetValue("ExtendedTerrain", ExtendedTerrain);
                 fileNode.Save(SettingsConfigUrl);
             }
             catch (Exception ex)
