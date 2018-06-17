@@ -74,24 +74,6 @@ namespace PhysicsRangeExtender
             _windowRect.height = _windowHeight;
         }
 
-        private void DrawWarning(float line)
-        {
-            var centerLabel = new GUIStyle
-            {
-                alignment = TextAnchor.UpperCenter,
-                normal = { textColor = Color.white }
-            };
-            var titleStyle = new GUIStyle(centerLabel)
-            {
-                fontSize = 11,
-                alignment = TextAnchor.MiddleCenter
-            };
-
-            GUI.Label(new Rect(0, ContentTop + line * entryHeight, WindowWidth, 20),
-                "Warning: Range > 100km may cause glitches.",
-                titleStyle);
-        }
-
         private void DrawGlobalVesselRange(float line)
         {
             var leftLabel = new GUIStyle

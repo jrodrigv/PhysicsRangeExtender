@@ -69,10 +69,15 @@ namespace PhysicsRangeExtender
         {
             if (FlightGlobals.VesselsLoaded.Count > 1 && FlightGlobals.VesselsLoaded.Count(x => x.Landed) >= 1)
             {
-                var maxdistanceBetweenActiveVesselAndLoadedVessels = CalculateDistanceToFurthestVessel();
+                //var maxdistanceBetweenActiveVesselAndLoadedVessels = CalculateDistanceToFurthestVessel();
 
-                FlightCamera.fetch.mainCamera.nearClipPlane = Math.Max(_initialClippingPlane,_initialClippingPlane * (maxdistanceBetweenActiveVesselAndLoadedVessels / 2500f));
+                var distanceMultiplier =
+                    _initialClippingPlane * (FlightGlobals.ActiveVessel.transform.position.sqrMagnitude / (2500f * 2500f));
 
+                FlightCamera.fetch.mainCamera.nearClipPlane = Mathf.Clamp(distanceMultiplier,_initialClippingPlane, _initialClippingPlane * 50f);
+
+                FlightGlobals.ActiveVessel.Parts.Select(x =>
+                    x.Rigidbody.interpolation = RigidbodyInterpolation.Interpolate);
             }
             else
             {
@@ -80,25 +85,10 @@ namespace PhysicsRangeExtender
             }
         }
 
-        private float CalculateDistanceToFurthestVessel()
-        {
-            float maxDistance = 0;
-
-            foreach ( Vessel v in FlightGlobals.VesselsLoaded.Where( x => x.LandedOrSplashed))
-            {
-                var distance = Vector3.Distance(v.CoM, FlightGlobals.ActiveVessel.CoM);
-                if (distance > maxDistance)
-                {
-                    maxDistance = distance;
-                }
-            }
-
-            return maxDistance;
-        }
-        
-
+        void LateUpdate() => UpdateNearClipPlane();
         void FixedUpdate()
-        {   
+        {
+            UpdateNearClipPlane();
             if (!ForceRanges)
             {
                 AvoidReferenceFrameChangeIssues();
