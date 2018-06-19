@@ -27,6 +27,8 @@ namespace PhysicsRangeExtender
             }
         }
 
+        public static bool FlickeringFix { get; set; } = true;
+
         void Start()
         {
             UpdateRanges();
@@ -67,7 +69,7 @@ namespace PhysicsRangeExtender
 
         private void UpdateNearClipPlane()
         {
-            if (FlightGlobals.VesselsLoaded.Count > 1 && FlightGlobals.VesselsLoaded.Count(x => x.Landed) >= 1)
+            if (FlickeringFix &&  FlightGlobals.VesselsLoaded.Count > 1 && FlightGlobals.VesselsLoaded.Count(x => x.Landed) >= 1)
             {
                 //var maxdistanceBetweenActiveVesselAndLoadedVessels = CalculateDistanceToFurthestVessel();
 

@@ -63,12 +63,30 @@ namespace PhysicsRangeExtender
             line++;
             DrawSaveButton(line);
             line++;
+            DrawToggleCameraNearClip(line);
             line++;
             DrawForceCheckBox(line);
             
 
             _windowHeight = ContentTop + line * entryHeight + entryHeight + entryHeight;
             _windowRect.height = _windowHeight;
+        }
+
+        private void DrawToggleCameraNearClip(float line)
+        {
+            var saveRect = new Rect(LeftIndent, ContentTop + line * entryHeight, contentWidth, entryHeight);
+
+
+            if (PhysicsRangeExtender.FlickeringFix)
+            {
+                if (GUI.Button(saveRect, "Disable flickering fix"))
+                    PhysicsRangeExtender.FlickeringFix = false;
+            }
+            else
+            {
+                if (GUI.Button(saveRect, "Enable flickering fix"))
+                    PhysicsRangeExtender.FlickeringFix = true;
+            }
         }
 
         private void DrawGlobalVesselRange(float line)
