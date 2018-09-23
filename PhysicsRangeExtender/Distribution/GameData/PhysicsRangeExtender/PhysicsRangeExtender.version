@@ -1,22 +1,22 @@
 {
   "NAME": "PhysicsRangeExtender",
   "URL":"https://github.com/jrodrigv/PhysicsRangeExtender/raw/master/PhysicsRangeExtender/Distribution/GameData/PhysicsRangeExtender/PhysicsRangeExtender.version",
-  "DOWNLOAD":"https://github.com/jrodrigv/PhysicsRangeExtender/releases/tag/1.7.0",
+  "DOWNLOAD":"https://github.com/jrodrigv/PhysicsRangeExtender/releases/tag/1.8.0",
   "CHANGE_LOG_URL":"https://github.com/jrodrigv/PhysicsRangeExtender/raw/master/PhysicsRangeExtender/Distribution/GameData/PhysicsRangeExtender/ChangeLog.txt",
   "VERSION": {
     "MAJOR": 1, 
-    "MINOR": 7,
+    "MINOR": 8,
     "PATCH": 0
   },
   "KSP_VERSION": {
     "MAJOR": 1,
     "MINOR": 4,
-    "PATCH": 3
+    "PATCH": 5
   },
   "KSP_VERSION_MIN": {
     "MAJOR": 1,
 	  "MINOR": 4,
-	  "PATCH": 0
+	  "PATCH": 5
   },
   "KSP_VERSION_MAX": {
     "MAJOR": 1,

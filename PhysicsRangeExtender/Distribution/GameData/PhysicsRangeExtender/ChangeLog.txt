@@ -1,3 +1,7 @@
+= v1.8.0
+- Recompiled and upgraded for KSP 1.4.5
+- Stock range reduced to 250 km
+
 = v1.7.0
 - Recompiled and upgraded for KSP 1.4.3
 - Adding option to extend terrain loading distance (thanks to Gedas)
