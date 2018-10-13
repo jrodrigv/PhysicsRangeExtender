@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using KSP.UI.Screens;
 using UnityEngine;
 
 namespace PhysicsRangeExtender
@@ -27,7 +28,8 @@ namespace PhysicsRangeExtender
             }
         }
 
-        public static bool FlickeringFix { get; set; } = true;
+        //public static bool FlickeringFix { get; set; } = true;
+        //public static bool TerrainExtender { get; set; } = true;
 
         void Start()
         {
@@ -69,7 +71,13 @@ namespace PhysicsRangeExtender
 
         private void UpdateNearClipPlane()
         {
-            if (FlickeringFix &&  FlightGlobals.VesselsLoaded.Count > 1 && FlightGlobals.VesselsLoaded.Count(x => x.LandedOrSplashed ) >= 1)
+            if (!PreSettings.FlickeringFix)
+            {
+                FlightCamera.fetch.mainCamera.nearClipPlane = _initialClippingPlane;
+                return;
+            }
+
+            if ( FlightGlobals.VesselsLoaded.Count > 1 && FlightGlobals.VesselsLoaded.Count(x => x.LandedOrSplashed ) >= 1)
             {
                 var distanceMultiplier =
                     _initialClippingPlane * (FlightGlobals.ActiveVessel.transform.position.sqrMagnitude / (2500f * 2500f));

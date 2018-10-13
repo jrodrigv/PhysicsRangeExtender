@@ -64,8 +64,7 @@ namespace PhysicsRangeExtender
             DrawSaveButton(line);
             line++;
             DrawToggleCameraNearClip(line);
-            line++;
-            DrawForceCheckBox(line);
+            
             
 
             _windowHeight = ContentTop + line * entryHeight + entryHeight + entryHeight;
@@ -77,15 +76,21 @@ namespace PhysicsRangeExtender
             var saveRect = new Rect(LeftIndent, ContentTop + line * entryHeight, contentWidth, entryHeight);
 
 
-            if (PhysicsRangeExtender.FlickeringFix)
+            if (!PreSettings.FlickeringFix)
             {
                 if (GUI.Button(saveRect, "Disable flickering fix"))
-                    PhysicsRangeExtender.FlickeringFix = false;
+                {
+                    PreSettings.FlickeringFix = false;
+                    PreSettings.SaveConfig();
+                }
             }
             else
             {
                 if (GUI.Button(saveRect, "Enable flickering fix"))
-                    PhysicsRangeExtender.FlickeringFix = true;
+                {
+                    PreSettings.FlickeringFix = true;
+                    PreSettings.SaveConfig();
+                }
             }
         }
 

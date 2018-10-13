@@ -23,37 +23,44 @@ namespace PhysicsRangeExtender
 
         private void ExtendTerrainDistance()
         {
-            var pqs = FlightGlobals.currentMainBody.pqsController;
-            pqs.horizonDistance = PreSettings.GlobalRange * 1000f;
-            pqs.maxDetailDistance = PreSettings.GlobalRange * 1000f;
-            pqs.minDetailDistance = PreSettings.GlobalRange * 1000f;
-            pqs.visRadSeaLevelValue = 200;
-            pqs.collapseSeaLevelValue = 200;
-
-            if (!_loading) return;
-
-            using (var v = FlightGlobals.VesselsLoaded.GetEnumerator())
+            try
             {
-                while (v.MoveNext())
+                var pqs = FlightGlobals.currentMainBody.pqsController;
+                pqs.horizonDistance = PreSettings.GlobalRange * 1000f;
+                pqs.maxDetailDistance = PreSettings.GlobalRange * 1000f;
+                pqs.minDetailDistance = PreSettings.GlobalRange * 1000f;
+                pqs.visRadSeaLevelValue = 200;
+                pqs.collapseSeaLevelValue = 200;
+
+                if (!_loading) return;
+
+                using (var v = FlightGlobals.VesselsLoaded.GetEnumerator())
                 {
-                    if (v.Current == null) continue;
-                    if (!SortaLanded(v.Current)) return;
-                    switch (_stage)
+                    while (v.MoveNext())
                     {
-                        case 0:
-                            v.Current?.SetWorldVelocity(v.Current.gravityForPos * -4 * Time.fixedDeltaTime);
-                            break;
-                        case 1:
-                            v.Current?.SetWorldVelocity(v.Current.gravityForPos * -2 * Time.fixedDeltaTime);
-                            break;
-                        case 4:
-                            v.Current?.SetWorldVelocity(v.Current.velocityD / 2);
-                            break;
-                        default:
-                            v.Current?.SetWorldVelocity(Vector3d.zero);
-                            break;
+                        if (v.Current == null) continue;
+                        if (!SortaLanded(v.Current)) return;
+                        switch (_stage)
+                        {
+                            case 0:
+                                v.Current?.SetWorldVelocity(v.Current.gravityForPos * -4 * Time.fixedDeltaTime);
+                                break;
+                            case 1:
+                                v.Current?.SetWorldVelocity(v.Current.gravityForPos * -2 * Time.fixedDeltaTime);
+                                break;
+                            case 4:
+                                v.Current?.SetWorldVelocity(v.Current.velocityD / 2);
+                                break;
+                            default:
+                                v.Current?.SetWorldVelocity(Vector3d.zero);
+                                break;
+                        }
                     }
                 }
+            }
+            catch (Exception)
+            {
+                // ignored
             }
         }
        
@@ -66,6 +73,8 @@ namespace PhysicsRangeExtender
         {
             if (!PreSettings.ConfigLoaded) return;
 
+            if (!PreSettings.TerrainExtender) return;
+
             ExtendTerrainDistance();
             EaseLoadingForExtendedRange();
         }
@@ -73,6 +82,7 @@ namespace PhysicsRangeExtender
         private void Apply()
         {
             if (!PreSettings.ConfigLoaded) return;
+            if (!PreSettings.TerrainExtender) return;
 
             ExtendTerrainDistance();
         }
@@ -140,6 +150,8 @@ namespace PhysicsRangeExtender
 
         private void Awake()
         {
+            if (!PreSettings.TerrainExtender) return;
+
             _crashDamage = CheatOptions.NoCrashDamage;
             _joints = CheatOptions.UnbreakableJoints;
             CheatOptions.NoCrashDamage = true;
