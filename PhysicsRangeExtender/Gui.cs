@@ -47,6 +47,7 @@ namespace PhysicsRangeExtender
         // ReSharper disable once InconsistentNaming
         private void OnGUI()
         {
+            if (!PreSettings.ConfigLoaded) return;
             if (GuiEnabled && _gameUiToggle)
                 _windowRect = GUI.Window(320, _windowRect, GuiWindow, "");
         }
@@ -59,40 +60,45 @@ namespace PhysicsRangeExtender
 
             DrawTitle();
             line++;
-            DrawGlobalVesselRange(line);
-            line++;
-            DrawSaveButton(line);
-            line++;
-            DrawToggleCameraNearClip(line);
-            
-            
+            if (PreSettings.ModEnabled)
+            {
+                DrawGlobalVesselRange(line);
+                line++;
+                DrawSaveButton(line);
+                line++;
+            }
+            DisableMod(line);
+
 
             _windowHeight = ContentTop + line * entryHeight + entryHeight + entryHeight;
             _windowRect.height = _windowHeight;
         }
 
-        private void DrawToggleCameraNearClip(float line)
+        private void DisableMod(float line)
         {
             var saveRect = new Rect(LeftIndent, ContentTop + line * entryHeight, contentWidth, entryHeight);
 
 
-            if (!PreSettings.FlickeringFix)
+            if (PreSettings.ModEnabled)
             {
-                if (GUI.Button(saveRect, "Disable flickering fix"))
+                if (GUI.Button(saveRect, "Disable Mod"))
                 {
-                    PreSettings.FlickeringFix = false;
+                    PreSettings.ModEnabled = false;
+                    PhysicsRangeExtender.RestoreStockRanges();
                     PreSettings.SaveConfig();
                 }
             }
             else
             {
-                if (GUI.Button(saveRect, "Enable flickering fix"))
+                if (GUI.Button(saveRect, "Enable Mod"))
                 {
-                    PreSettings.FlickeringFix = true;
+                    PreSettings.ModEnabled = true;
+                    Apply();
                     PreSettings.SaveConfig();
                 }
             }
         }
+
 
         private void DrawGlobalVesselRange(float line)
         {
@@ -116,23 +122,6 @@ namespace PhysicsRangeExtender
             var saveRect = new Rect(LeftIndent, ContentTop + line * entryHeight, contentWidth / 2, entryHeight);
             if (GUI.Button(saveRect, "Apply new range"))
                 Apply();
-        }
-
-        private void DrawForceCheckBox(float line)
-        {
-            var saveRect = new Rect(LeftIndent, ContentTop + line * entryHeight, contentWidth , entryHeight);
-
-           
-            if (PhysicsRangeExtender.ForceRanges)
-            {
-                if (GUI.Button(saveRect, "Disable unsafe range update"))
-                    PhysicsRangeExtender.ForceRanges = false;
-            }
-            else
-            {
-                if (GUI.Button(saveRect, "Force unsafe range update"))
-                    PhysicsRangeExtender.ForceRanges = true;
-            }
         }
 
         private void Apply()

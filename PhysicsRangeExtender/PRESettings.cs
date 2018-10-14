@@ -8,9 +8,8 @@ namespace PhysicsRangeExtender
     {
         public static string SettingsConfigUrl = "GameData/PhysicsRangeExtender/settings.cfg";
         public static int GlobalRange { get; set; }
-        public static bool FlickeringFix { get; set; }
-        public static bool TerrainExtender { get; set; }
         public static bool ConfigLoaded { get; set; } = false;
+        public static bool ModEnabled { get; set; }
 
         void Awake()
         {
@@ -29,8 +28,7 @@ namespace PhysicsRangeExtender
 
                 ConfigNode settings = fileNode.GetNode("PreSettings");
                 GlobalRange = int.Parse(settings.GetValue("GlobalRange"));
-                FlickeringFix = bool.Parse(settings.GetValue("FlickeringFix"));
-                TerrainExtender = bool.Parse(settings.GetValue("TerrainExtender"));
+                ModEnabled = bool.Parse(settings.GetValue("ModEnabled"));
 
             }
             catch (Exception ex)
@@ -49,8 +47,7 @@ namespace PhysicsRangeExtender
                 ConfigNode settings = fileNode.GetNode("PreSettings");
 
                 settings.SetValue("GlobalRange", GlobalRange);
-                settings.SetValue("FlickeringFix", FlickeringFix);
-                settings.SetValue("TerrainExtender", TerrainExtender);
+                settings.SetValue("ModEnabled", ModEnabled);
                 fileNode.Save(SettingsConfigUrl);
             }
             catch (Exception ex)

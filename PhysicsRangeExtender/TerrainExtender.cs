@@ -72,8 +72,7 @@ namespace PhysicsRangeExtender
         private void Update()
         {
             if (!PreSettings.ConfigLoaded) return;
-
-            if (!PreSettings.TerrainExtender) return;
+            if (!PreSettings.ModEnabled) return;
 
             ExtendTerrainDistance();
             EaseLoadingForExtendedRange();
@@ -82,7 +81,7 @@ namespace PhysicsRangeExtender
         private void Apply()
         {
             if (!PreSettings.ConfigLoaded) return;
-            if (!PreSettings.TerrainExtender) return;
+            if (!PreSettings.ModEnabled) return;
 
             ExtendTerrainDistance();
         }
@@ -150,7 +149,7 @@ namespace PhysicsRangeExtender
 
         private void Awake()
         {
-            if (!PreSettings.TerrainExtender) return;
+            if (!PreSettings.ModEnabled) return;
 
             _crashDamage = CheatOptions.NoCrashDamage;
             _joints = CheatOptions.UnbreakableJoints;
