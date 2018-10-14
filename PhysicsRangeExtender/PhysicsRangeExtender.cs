@@ -59,7 +59,7 @@ namespace PhysicsRangeExtender
 
         private void UpdateNearClipPlane()
         {
-            if ( FlightGlobals.VesselsLoaded.Count > 1 && FlightGlobals.VesselsLoaded.Count(x => x.LandedOrSplashed ) >= 1)
+            if ( FlightGlobals.VesselsLoaded.Count > 1)
             {
                 var distanceMultiplier =
                     _initialClippingPlane * (FlightGlobals.ActiveVessel.transform.position.sqrMagnitude / (2500f * 2500f));
@@ -251,11 +251,12 @@ namespace PhysicsRangeExtender
         {
             try
             {
+                FlightCamera.fetch.mainCamera.nearClipPlane = _initialClippingPlane;
                 var vesselsCount = FlightGlobals.Vessels.Count;
 
                 for (var i = 0; i < vesselsCount; i++)
                 {
-                    FlightGlobals.Vessels[i].vesselRanges = new VesselRanges(new VesselRanges());
+                    FlightGlobals.Vessels[i].vesselRanges = new VesselRanges();
                 }
             }
             catch (Exception e)

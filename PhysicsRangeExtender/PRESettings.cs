@@ -29,7 +29,7 @@ namespace PhysicsRangeExtender
                 ConfigNode settings = fileNode.GetNode("PreSettings");
                 GlobalRange = int.Parse(settings.GetValue("GlobalRange"));
                 ModEnabled = bool.Parse(settings.GetValue("ModEnabled"));
-
+                Debug.Log("[PhysicsRangeExtender]: ModEnabled:" + ModEnabled);
             }
             catch (Exception ex)
             {
