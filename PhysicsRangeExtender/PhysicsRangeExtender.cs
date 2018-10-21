@@ -209,6 +209,7 @@ namespace PhysicsRangeExtender
 
         private static void ApplyRangesToVessels( bool updatingFromUi = false)
         {
+            if (!PreSettings.ModEnabled) return;
             try
             {
                 var vesselsCount = FlightGlobals.Vessels.Count;
