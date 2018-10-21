@@ -19,7 +19,6 @@ namespace PhysicsRangeExtender
         private int _stage;
         private Vessel _tvel;
         private IEnumerator<Vessel> _vesEnume;
-        private static PqsData _originalPqsData;
 
         private void ExtendTerrainDistance()
         {
