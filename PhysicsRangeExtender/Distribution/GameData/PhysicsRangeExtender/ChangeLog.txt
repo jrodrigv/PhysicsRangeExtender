@@ -1,6 +1,9 @@
 = v1.8.0
-- Recompiled and upgraded for KSP 1.4.5
-- Stock range reduced to 250 km
+- Recompiled for KSP 1.5.1
+- Default range reduced to 50 km
+- UI simplifed. Removing options that were not used
+- Added button to disable de mod.
+- Added message to warn the user when the flickering fix is activated.
 
 = v1.7.0
 - Recompiled and upgraded for KSP 1.4.3
