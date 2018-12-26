@@ -62,7 +62,7 @@ namespace PhysicsRangeExtender
             if (FlightGlobals.VesselsLoaded.Count > 1 && FlightGlobals.VesselsLoaded.Count(x => x.LandedOrSplashed) >= 1)
             {
                 var distanceMultiplier =
-                    _initialClippingPlane * (FlightGlobals.ActiveVessel.transform.position.sqrMagnitude / (2500f * 2500f));
+                    _initialClippingPlane * (FlightGlobals.ActiveVessel.transform.position.sqrMagnitude / (4000f * 4000f)) * (float) PreSettings.CamFixMultiplier;
 
                 FlightCamera.fetch.mainCamera.nearClipPlane = Mathf.Clamp(distanceMultiplier,_initialClippingPlane, _initialClippingPlane * 50f);
 
