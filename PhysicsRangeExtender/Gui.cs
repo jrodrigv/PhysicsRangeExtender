@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using KSP.UI.Screens;
 using UnityEngine;
 
@@ -25,6 +26,7 @@ namespace PhysicsRangeExtender
 
         private float _windowHeight = 250;
         private Rect _windowRect;
+        private string _guiCamFixMultiplier;
 
         private void Awake()
         {
@@ -42,6 +44,7 @@ namespace PhysicsRangeExtender
             GameEvents.onShowUI.Add(GameUiEnable);
             _gameUiToggle = true;
             _guiGlobalRangeForVessels = PreSettings.GlobalRange.ToString();
+            _guiCamFixMultiplier = PreSettings.CamFixMultiplier.ToString();
         }
 
         // ReSharper disable once InconsistentNaming
@@ -63,6 +66,8 @@ namespace PhysicsRangeExtender
             if (PreSettings.ModEnabled)
             {
                 DrawGlobalVesselRange(line);
+                line++;
+                DrawCamFixMultiplier(line);
                 line++;
                 DrawSaveButton(line);
                 line++;
@@ -117,6 +122,24 @@ namespace PhysicsRangeExtender
           
         }
 
+        private void DrawCamFixMultiplier(float line)
+        {
+            var leftLabel = new GUIStyle
+            {
+                alignment = TextAnchor.UpperLeft,
+                normal = { textColor = Color.white }
+            };
+
+            GUI.Label(new Rect(LeftIndent, ContentTop + line * entryHeight, 60, entryHeight), "Cam fix multiplier:",
+                leftLabel);
+            float textFieldWidth = 42;
+            var fwdFieldRect = new Rect(LeftIndent + contentWidth - textFieldWidth - 3 * _incrButtonWidth,
+                ContentTop + line * entryHeight, textFieldWidth, entryHeight);
+
+           this._guiCamFixMultiplier = GUI.TextField(fwdFieldRect, _guiCamFixMultiplier.ToString());
+           
+        }
+
         private void DrawSaveButton(float line)
         {
             var saveRect = new Rect(LeftIndent, ContentTop + line * entryHeight, contentWidth / 2, entryHeight);
@@ -131,6 +154,13 @@ namespace PhysicsRangeExtender
                 PreSettings.GlobalRange = parseGlobalRange;
                 _guiGlobalRangeForVessels = PreSettings.GlobalRange.ToString();
             }
+
+            if (float.TryParse(_guiCamFixMultiplier, out var parseCamFix))
+            {
+                PreSettings.CamFixMultiplier = parseCamFix;
+                _guiCamFixMultiplier = PreSettings.CamFixMultiplier.ToString();
+            }
+
 
             PreSettings.SaveConfig();
             PhysicsRangeExtender.UpdateRanges(true);
