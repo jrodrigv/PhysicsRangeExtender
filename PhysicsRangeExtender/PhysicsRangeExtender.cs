@@ -22,9 +22,16 @@ namespace PhysicsRangeExtender
             
             GameEvents.onVesselCreate.Add(ApplyPhysRange);
             GameEvents.onVesselLoaded.Add(ApplyPhysRange);
+            GameEvents.onVesselSwitchingToUnloaded.Add(ApplyPhysRange);
             GameEvents.onVesselSwitching.Add(ApplyPhysRange);
+            GameEvents.onVesselSituationChange.Add(ApplyPhysRange);
             GameEvents.onVesselGoOffRails.Add(ApplyPhysRange);
             GameEvents.onVesselGoOffRails.Add(ApplyPhysRange);
+        }
+
+        private void ApplyPhysRange(GameEvents.HostedFromToAction<Vessel, Vessel.Situations> data)
+        {
+            ApplyRangesToVessels();
         }
 
         void OnDestroy()
@@ -34,6 +41,8 @@ namespace PhysicsRangeExtender
             GameEvents.onVesselCreate.Remove(ApplyPhysRange);
             GameEvents.onVesselLoaded.Remove(ApplyPhysRange);
             GameEvents.onVesselSwitching.Remove(ApplyPhysRange);
+            GameEvents.onVesselSwitchingToUnloaded.Remove(ApplyPhysRange);
+            GameEvents.onVesselSituationChange.Remove(ApplyPhysRange);
             GameEvents.onVesselGoOffRails.Remove(ApplyPhysRange);
             GameEvents.onVesselGoOffRails.Remove(ApplyPhysRange);
         }
