@@ -20,46 +20,69 @@ namespace PhysicsRangeExtender
         private Vessel _tvel;
         private IEnumerator<Vessel> _vesEnume;
 
+        private double initHorizonDistance = 0;
+        private double initmaxDetailDistance = 0;
+        private double initminDetailDistance = 0;
+
         private void ExtendTerrainDistance()
         {
             try
             {
-                var pqs = FlightGlobals.currentMainBody.pqsController;
-                pqs.horizonDistance = PreSettings.GlobalRange * 1000f;
-                pqs.maxDetailDistance = PreSettings.GlobalRange * 1000f;
-                pqs.minDetailDistance = PreSettings.GlobalRange * 1000f;
-                pqs.visRadSeaLevelValue = 200;
-                pqs.collapseSeaLevelValue = 200;
-
-                if (!_loading) return;
-
-                using (var v = FlightGlobals.VesselsLoaded.GetEnumerator())
+                if (FlightGlobals.VesselsLoaded.Count > 1 &&
+                    FlightGlobals.VesselsLoaded.Count(x => x.LandedOrSplashed) >= 1)
                 {
-                    while (v.MoveNext())
+
+                    var pqs = FlightGlobals.currentMainBody.pqsController;
+
+                    pqs.horizonDistance = PreSettings.GlobalRange * 1000f * 1.15;
+                    pqs.maxDetailDistance = PreSettings.GlobalRange * 1000f * 1.15;
+                    pqs.minDetailDistance = PreSettings.GlobalRange * 1000f * 1.15;
+
+                    pqs.visRadSeaLevelValue = 200;
+                    pqs.collapseSeaLevelValue = 200;
+
+                    if (!_loading) return;
+
+                    initHorizonDistance = pqs.horizonDistance;
+                    initmaxDetailDistance = pqs.maxDetailDistance;
+                    initminDetailDistance = pqs.minDetailDistance;
+
+                    using (var v = FlightGlobals.VesselsLoaded.GetEnumerator())
                     {
-                        if (v.Current == null) continue;
-                        if (!SortaLanded(v.Current)) return;
-                        switch (_stage)
+                        while (v.MoveNext())
                         {
-                            case 0:
-                                v.Current?.SetWorldVelocity(v.Current.gravityForPos * -4 * Time.fixedDeltaTime);
-                                break;
-                            case 1:
-                                v.Current?.SetWorldVelocity(v.Current.gravityForPos * -2 * Time.fixedDeltaTime);
-                                break;
-                            case 4:
-                                v.Current?.SetWorldVelocity(v.Current.velocityD / 2);
-                                break;
-                            default:
-                                v.Current?.SetWorldVelocity(Vector3d.zero);
-                                break;
+                            if (v.Current == null) continue;
+                            if (!SortaLanded(v.Current)) return;
+                            switch (_stage)
+                            {
+                                case 0:
+                                    v.Current?.SetWorldVelocity(v.Current.gravityForPos * -4 * Time.fixedDeltaTime);
+                                    break;
+                                case 1:
+                                    v.Current?.SetWorldVelocity(v.Current.gravityForPos * -2 * Time.fixedDeltaTime);
+                                    break;
+                                case 4:
+                                    v.Current?.SetWorldVelocity(v.Current.velocityD / 2);
+                                    break;
+                                default:
+                                    v.Current?.SetWorldVelocity(Vector3d.zero);
+                                    break;
+                            }
                         }
                     }
+                }
+                else
+                {
+                    var pqs = FlightGlobals.currentMainBody.pqsController;
+
+                    pqs.horizonDistance = initHorizonDistance;
+                    pqs.maxDetailDistance = initmaxDetailDistance;
+                    pqs.minDetailDistance = initminDetailDistance;
                 }
             }
             catch (Exception)
             {
-                // ignored
+                Debug.Log("[PhysicsRangeExtender]: Exception extending terrain, updating initial values");        
             }
         }
        
@@ -72,6 +95,7 @@ namespace PhysicsRangeExtender
         {
             if (!PreSettings.ConfigLoaded) return;
             if (!PreSettings.ModEnabled) return;
+            if (!PreSettings.TerrainExtenderEnabled) return;
 
             ExtendTerrainDistance();
             EaseLoadingForExtendedRange();
@@ -81,6 +105,7 @@ namespace PhysicsRangeExtender
         {
             if (!PreSettings.ConfigLoaded) return;
             if (!PreSettings.ModEnabled) return;
+            if (!PreSettings.TerrainExtenderEnabled) return;
 
             ExtendTerrainDistance();
         }
@@ -149,7 +174,7 @@ namespace PhysicsRangeExtender
         private void Awake()
         {
             if (!PreSettings.ModEnabled) return;
-
+            if (!PreSettings.TerrainExtenderEnabled) return;
             _crashDamage = CheatOptions.NoCrashDamage;
             _joints = CheatOptions.UnbreakableJoints;
             CheatOptions.NoCrashDamage = true;

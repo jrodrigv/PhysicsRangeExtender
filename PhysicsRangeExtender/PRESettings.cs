@@ -10,6 +10,7 @@ namespace PhysicsRangeExtender
         public static int GlobalRange { get; set; }
         public static bool ConfigLoaded { get; set; } = false;
         public static bool ModEnabled { get; set; }
+        public static bool TerrainExtenderEnabled { get; set; }
 
         void Awake()
         {
@@ -29,7 +30,7 @@ namespace PhysicsRangeExtender
                 ConfigNode settings = fileNode.GetNode("PreSettings");
                 GlobalRange = int.Parse(settings.GetValue("GlobalRange"));
                 ModEnabled = bool.Parse(settings.GetValue("ModEnabled"));
-                Debug.Log("[PhysicsRangeExtender]: ModEnabled:" + ModEnabled);
+                TerrainExtenderEnabled = bool.Parse(settings.GetValue("TerrainExtenderEnabled"));
             }
             catch (Exception ex)
             {
@@ -48,6 +49,7 @@ namespace PhysicsRangeExtender
 
                 settings.SetValue("GlobalRange", GlobalRange);
                 settings.SetValue("ModEnabled", ModEnabled);
+                settings.SetValue("TerrainExtenderEnabled", TerrainExtenderEnabled);
                 fileNode.Save(SettingsConfigUrl);
             }
             catch (Exception ex)
