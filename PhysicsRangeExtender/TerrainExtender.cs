@@ -56,8 +56,10 @@ namespace PhysicsRangeExtender
                             switch (_stage)
                             {
                                 case 0:
+                                    Debug.Log("ExtendTerrainDistance stage0");
                                     v.Current?.SetWorldVelocity(v.Current.gravityForPos * -4 * Time.fixedDeltaTime);
                                     break;
+                                    Debug.Log("ExtendTerrainDistance stage1");
                                 case 1:
                                     v.Current?.SetWorldVelocity(v.Current.gravityForPos * -2 * Time.fixedDeltaTime);
                                     break;
@@ -97,6 +99,11 @@ namespace PhysicsRangeExtender
             if (!PreSettings.ModEnabled) return;
             if (!PreSettings.TerrainExtenderEnabled) return;
 
+            if (executeTerrainExtender)
+            {
+                ResetParameters();
+                executeTerrainExtender = false;
+            }
             ExtendTerrainDistance();
             EaseLoadingForExtendedRange();
         }
@@ -108,6 +115,18 @@ namespace PhysicsRangeExtender
             if (!PreSettings.TerrainExtenderEnabled) return;
 
             ExtendTerrainDistance();
+        }
+
+        private void ResetParameters()
+        {
+            this._loading = true;
+            this._reset = 111;
+            this._stage = 0;
+            _crashDamage = CheatOptions.NoCrashDamage;
+            _joints = CheatOptions.UnbreakableJoints;
+            CheatOptions.NoCrashDamage = true;
+            CheatOptions.UnbreakableJoints = true;
+
         }
 
         private void EaseLoadingForExtendedRange()
@@ -133,6 +152,8 @@ namespace PhysicsRangeExtender
                     {
                         if (SortaLanded(_vesEnume.Current))
                             FlightGlobals.ForceSetActiveVessel(_vesEnume.Current);
+                           _vesEnume.Current.mainBody.pqsController.StartUpSphere();
+                        PhysicsRangeExtender.VesselToFreeze.Remove(_vesEnume.Current);
                         _vesEnume.Current.OnFlyByWire += Thratlarasat;
                     }
                     else
@@ -145,7 +166,6 @@ namespace PhysicsRangeExtender
                     ScreenMessages.PostScreenMessage(
                         "[PhysicsRangeExtender]Extending terrain distance: entangling.", 3f,
                         ScreenMessageStyle.UPPER_CENTER);
-                    Debug.LogError($"Black Spell entangling {_vesEnume.Current?.vesselName}");
                     break;
                 case 2:
                     ScreenMessages.PostScreenMessage(
@@ -170,7 +190,6 @@ namespace PhysicsRangeExtender
                     break;
             }
         }
-
         private void Awake()
         {
             if (!PreSettings.ModEnabled) return;
@@ -181,7 +200,7 @@ namespace PhysicsRangeExtender
             CheatOptions.UnbreakableJoints = true;
         }
 
-        private bool SortaLanded(Vessel v)
+        public static bool SortaLanded(Vessel v)
         {
             return v.mainBody.GetAltitude(v.CoM) - Math.Max(v.terrainAltitude, 0) < 100;
         }
@@ -191,5 +210,13 @@ namespace PhysicsRangeExtender
             s.wheelThrottle = 0;
             s.mainThrottle = 0;
         }
+
+        public static void ExtendForNewVessel()
+        {
+            executeTerrainExtender = true;
+        }
+
+        public static bool executeTerrainExtender
+        { get; set; }
     }
 }
