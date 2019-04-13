@@ -20,9 +20,11 @@ namespace PhysicsRangeExtender
         private Vessel _tvel;
         private IEnumerator<Vessel> _vesEnume;
 
-        private double initHorizonDistance = 0;
-        private double initmaxDetailDistance = 0;
-        private double initminDetailDistance = 0;
+        private double _initHorizonDistance;
+        private double _initmaxDetailDistance;
+        private double _initminDetailDistance;
+
+        public static bool ExecuteTerrainExtender { get; set; }
 
         private void ExtendTerrainDistance()
         {
@@ -31,7 +33,6 @@ namespace PhysicsRangeExtender
                 if (FlightGlobals.VesselsLoaded.Count > 1 &&
                     FlightGlobals.VesselsLoaded.Count(x => x.LandedOrSplashed) >= 1)
                 {
-
                     var pqs = FlightGlobals.currentMainBody.pqsController;
 
                     pqs.horizonDistance = PreSettings.GlobalRange * 1000f * 1.15;
@@ -43,9 +44,9 @@ namespace PhysicsRangeExtender
 
                     if (!_loading) return;
 
-                    initHorizonDistance = pqs.horizonDistance;
-                    initmaxDetailDistance = pqs.maxDetailDistance;
-                    initminDetailDistance = pqs.minDetailDistance;
+                    _initHorizonDistance = pqs.horizonDistance;
+                    _initmaxDetailDistance = pqs.maxDetailDistance;
+                    _initminDetailDistance = pqs.minDetailDistance;
 
                     using (var v = FlightGlobals.VesselsLoaded.GetEnumerator())
                     {
@@ -56,10 +57,8 @@ namespace PhysicsRangeExtender
                             switch (_stage)
                             {
                                 case 0:
-                                    Debug.Log("ExtendTerrainDistance stage0");
                                     v.Current?.SetWorldVelocity(v.Current.gravityForPos * -4 * Time.fixedDeltaTime);
                                     break;
-                                    Debug.Log("ExtendTerrainDistance stage1");
                                 case 1:
                                     v.Current?.SetWorldVelocity(v.Current.gravityForPos * -2 * Time.fixedDeltaTime);
                                     break;
@@ -77,21 +76,27 @@ namespace PhysicsRangeExtender
                 {
                     var pqs = FlightGlobals.currentMainBody.pqsController;
 
-                    pqs.horizonDistance = initHorizonDistance;
-                    pqs.maxDetailDistance = initmaxDetailDistance;
-                    pqs.minDetailDistance = initminDetailDistance;
+                    pqs.horizonDistance = _initHorizonDistance;
+                    pqs.maxDetailDistance = _initmaxDetailDistance;
+                    pqs.minDetailDistance = _initminDetailDistance;
                 }
             }
             catch (Exception)
             {
-                Debug.Log("[PhysicsRangeExtender]: Exception extending terrain, updating initial values");        
+                Debug.Log("[PhysicsRangeExtender]: Exception extending terrain, updating initial values");
             }
         }
-       
 
 
-        void FixedUpdate() => Apply();
-        void LateUpdate() => Apply();
+        private void FixedUpdate()
+        {
+            Apply();
+        }
+
+        private void LateUpdate()
+        {
+            Apply();
+        }
 
         private void Update()
         {
@@ -99,11 +104,12 @@ namespace PhysicsRangeExtender
             if (!PreSettings.ModEnabled) return;
             if (!PreSettings.TerrainExtenderEnabled) return;
 
-            if (executeTerrainExtender)
+            if (ExecuteTerrainExtender)
             {
                 ResetParameters();
-                executeTerrainExtender = false;
+                ExecuteTerrainExtender = false;
             }
+
             ExtendTerrainDistance();
             EaseLoadingForExtendedRange();
         }
@@ -119,14 +125,13 @@ namespace PhysicsRangeExtender
 
         private void ResetParameters()
         {
-            this._loading = true;
-            this._reset = 111;
-            this._stage = 0;
+            _loading = true;
+            _reset = 111;
+            _stage = 0;
             _crashDamage = CheatOptions.NoCrashDamage;
             _joints = CheatOptions.UnbreakableJoints;
             CheatOptions.NoCrashDamage = true;
             CheatOptions.UnbreakableJoints = true;
-
         }
 
         private void EaseLoadingForExtendedRange()
@@ -147,14 +152,20 @@ namespace PhysicsRangeExtender
                     break;
                 case 1:
                     if (_vesEnume.Current != null)
+                    {
                         _vesEnume.Current.OnFlyByWire -= Thratlarasat;
+                    }
+                      
                     if (_vesEnume.MoveNext())
                     {
-                        if (SortaLanded(_vesEnume.Current))
+                        if (_vesEnume.Current != null)
+                        {
+                            if (SortaLanded(_vesEnume.Current))
                             FlightGlobals.ForceSetActiveVessel(_vesEnume.Current);
-                           _vesEnume.Current.mainBody.pqsController.StartUpSphere();
-                        PhysicsRangeExtender.VesselToFreeze.Remove(_vesEnume.Current);
-                        _vesEnume.Current.OnFlyByWire += Thratlarasat;
+                            _vesEnume.Current.mainBody.pqsController.StartUpSphere();
+                            PhysicsRangeExtender.VesselToFreeze.Remove(_vesEnume.Current);
+                            _vesEnume.Current.OnFlyByWire += Thratlarasat;
+                        }
                     }
                     else
                     {
@@ -190,6 +201,7 @@ namespace PhysicsRangeExtender
                     break;
             }
         }
+
         private void Awake()
         {
             if (!PreSettings.ModEnabled) return;
@@ -213,10 +225,7 @@ namespace PhysicsRangeExtender
 
         public static void ExtendForNewVessel()
         {
-            executeTerrainExtender = true;
+            ExecuteTerrainExtender = true;
         }
-
-        public static bool executeTerrainExtender
-        { get; set; }
     }
 }
