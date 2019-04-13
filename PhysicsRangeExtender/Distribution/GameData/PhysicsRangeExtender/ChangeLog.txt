@@ -1,3 +1,7 @@
+= v1.10.0
+- Recompiled for KSP 1.7.0
+- Fixed critical issue which make landed vessel to crash through the ground when entering into physics range. 
+
 = v1.9.0
 - Recompiled for KSP 1.6.0
 - Added the Cam fix multiplier option so users can tweak the camera distance if they are not happy with the fix.
