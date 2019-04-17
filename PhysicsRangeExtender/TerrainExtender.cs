@@ -19,96 +19,81 @@ namespace PhysicsRangeExtender
         private int _stage;
         private Vessel _tvel;
         private IEnumerator<Vessel> _vesEnume;
-
-        private double _initHorizonDistance;
-        private double _initmaxDetailDistance;
-        private double _initminDetailDistance;
-
         public static bool ExecuteTerrainExtender { get; set; }
+
+        private double lastsphererefresh = 0;
+
+
+        public static void UpdateSphere()
+        {
+            var pqs = FlightGlobals.currentMainBody.pqsController;
+            pqs.horizonDistance = PreSettings.GlobalRange * 1000f * 1.15;
+            pqs.maxDetailDistance = PreSettings.GlobalRange * 1000f * 1.15;
+            pqs.minDetailDistance = PreSettings.GlobalRange * 1000f * 1.15;
+
+            pqs.visRadSeaLevelValue = 200;
+            pqs.collapseSeaLevelValue = 200;
+            pqs.StartUpSphere();
+        }
 
         private void ExtendTerrainDistance()
         {
             try
             {
-                if (FlightGlobals.VesselsLoaded.Count > 1 &&
-                    FlightGlobals.VesselsLoaded.Count(x => x.LandedOrSplashed) >= 1)
+                if (!_loading) return;
+
+
+                List<Vessel> listOfVessels = new List<Vessel>();
+
+                if(PhysicsRangeExtender.VesselToFreeze.Count > 0)
                 {
-                    var pqs = FlightGlobals.currentMainBody.pqsController;
-
-                    pqs.horizonDistance = PreSettings.GlobalRange * 1000f * 1.15;
-                    pqs.maxDetailDistance = PreSettings.GlobalRange * 1000f * 1.15;
-                    pqs.minDetailDistance = PreSettings.GlobalRange * 1000f * 1.15;
-
-                    pqs.visRadSeaLevelValue = 200;
-                    pqs.collapseSeaLevelValue = 200;
-
-                    if (!_loading) return;
-
-                    _initHorizonDistance = pqs.horizonDistance;
-                    _initmaxDetailDistance = pqs.maxDetailDistance;
-                    _initminDetailDistance = pqs.minDetailDistance;
-
-                    using (var v = FlightGlobals.VesselsLoaded.GetEnumerator())
-                    {
-                        while (v.MoveNext())
-                        {
-                            if (v.Current == null) continue;
-                            if (!SortaLanded(v.Current)) return;
-                            switch (_stage)
-                            {
-                                case 0:
-                                    v.Current?.SetWorldVelocity(v.Current.gravityForPos * -4 * Time.fixedDeltaTime);
-                                    break;
-                                case 1:
-                                    v.Current?.SetWorldVelocity(v.Current.gravityForPos * -2 * Time.fixedDeltaTime);
-                                    break;
-                                case 4:
-                                    v.Current?.SetWorldVelocity(v.Current.velocityD / 2);
-                                    break;
-                                default:
-                                    v.Current?.SetWorldVelocity(Vector3d.zero);
-                                    break;
-                            }
-                        }
-                    }
+                    listOfVessels = PhysicsRangeExtender.VesselToFreeze;
                 }
                 else
                 {
-                    var pqs = FlightGlobals.currentMainBody.pqsController;
+                    listOfVessels = FlightGlobals.VesselsLoaded;
+                }
 
-                    pqs.horizonDistance = _initHorizonDistance;
-                    pqs.maxDetailDistance = _initmaxDetailDistance;
-                    pqs.minDetailDistance = _initminDetailDistance;
+                using (var v = listOfVessels.GetEnumerator())
+                {
+                    while (v.MoveNext())
+                    {
+                        if (v.Current == null) continue;
+                        if (!SortaLanded(v.Current)) return;
+                        switch (_stage)
+                        {
+                            case 0:
+                                v.Current?.SetWorldVelocity(v.Current.gravityForPos * -4 * Time.fixedDeltaTime);
+                                break;
+                            case 1:
+                                v.Current?.SetWorldVelocity(v.Current.gravityForPos * -2 * Time.fixedDeltaTime);
+                                break;
+                            case 4:
+                                v.Current?.SetWorldVelocity(v.Current.velocityD / 2);
+                                break;
+                            default:
+                                v.Current?.SetWorldVelocity(Vector3d.zero);
+                                break;
+                        }
+                    }
                 }
             }
             catch (Exception)
             {
-                Debug.Log("[PhysicsRangeExtender]: Exception extending terrain, updating initial values");
+                // ignored
             }
         }
 
 
-        private void FixedUpdate()
-        {
-            Apply();
-        }
 
-        private void LateUpdate()
-        {
-            Apply();
-        }
+        void FixedUpdate() => Apply();
+        void LateUpdate() => Apply();
 
         private void Update()
         {
             if (!PreSettings.ConfigLoaded) return;
             if (!PreSettings.ModEnabled) return;
             if (!PreSettings.TerrainExtenderEnabled) return;
-
-            if (ExecuteTerrainExtender)
-            {
-                ResetParameters();
-                ExecuteTerrainExtender = false;
-            }
 
             ExtendTerrainDistance();
             EaseLoadingForExtendedRange();
@@ -120,9 +105,12 @@ namespace PhysicsRangeExtender
             if (!PreSettings.ModEnabled) return;
             if (!PreSettings.TerrainExtenderEnabled) return;
 
+            if (PhysicsRangeExtender.VesselToFreeze.Count > 0 && !_loading)
+            {
+                ResetParameters();
+            }
             ExtendTerrainDistance();
         }
-
         private void ResetParameters()
         {
             _loading = true;
@@ -146,26 +134,31 @@ namespace PhysicsRangeExtender
             switch (_stage)
             {
                 case 0:
-                    _vesEnume = FlightGlobals.VesselsLoaded.ToList().GetEnumerator();
+                    if (PhysicsRangeExtender.VesselToFreeze.Count > 0)
+                    {
+                        _vesEnume = PhysicsRangeExtender.VesselToFreeze.ToList().GetEnumerator();
+                    }
+                    else
+                    {
+                        _vesEnume = FlightGlobals.VesselsLoaded.ToList().GetEnumerator();
+                    }
                     _tvel = FlightGlobals.ActiveVessel;
                     ++_stage;
                     break;
                 case 1:
                     if (_vesEnume.Current != null)
-                    {
                         _vesEnume.Current.OnFlyByWire -= Thratlarasat;
-                    }
-                      
                     if (_vesEnume.MoveNext())
                     {
-                        if (_vesEnume.Current != null)
-                        {
-                            if (SortaLanded(_vesEnume.Current))
+                        if (SortaLanded(_vesEnume.Current))
                             FlightGlobals.ForceSetActiveVessel(_vesEnume.Current);
-                            _vesEnume.Current.mainBody.pqsController.StartUpSphere();
-                            PhysicsRangeExtender.VesselToFreeze.Remove(_vesEnume.Current);
-                            _vesEnume.Current.OnFlyByWire += Thratlarasat;
+
+                        if (PhysicsRangeExtender.VesselToFreeze.Count > 0 && Time.time - lastsphererefresh > 30)
+                        {
+                            UpdateSphere();
+                            lastsphererefresh = Time.time;
                         }
+                            _vesEnume.Current.OnFlyByWire += Thratlarasat;
                     }
                     else
                     {
@@ -177,6 +170,7 @@ namespace PhysicsRangeExtender
                     ScreenMessages.PostScreenMessage(
                         "[PhysicsRangeExtender]Extending terrain distance: entangling.", 3f,
                         ScreenMessageStyle.UPPER_CENTER);
+                    Debug.LogError($"Black Spell entangling {_vesEnume.Current?.vesselName}");
                     break;
                 case 2:
                     ScreenMessages.PostScreenMessage(
@@ -195,6 +189,7 @@ namespace PhysicsRangeExtender
                     CheatOptions.NoCrashDamage = _crashDamage;
                     CheatOptions.UnbreakableJoints = _joints;
                     _loading = false;
+                    PhysicsRangeExtender.VesselToFreeze.Clear();
                     ScreenMessages.PostScreenMessage(
                         "[PhysicsRangeExtender]Extending terrain distance: complete.", 3f,
                         ScreenMessageStyle.UPPER_CENTER);
@@ -206,13 +201,14 @@ namespace PhysicsRangeExtender
         {
             if (!PreSettings.ModEnabled) return;
             if (!PreSettings.TerrainExtenderEnabled) return;
+
             _crashDamage = CheatOptions.NoCrashDamage;
             _joints = CheatOptions.UnbreakableJoints;
             CheatOptions.NoCrashDamage = true;
             CheatOptions.UnbreakableJoints = true;
         }
 
-        public static bool SortaLanded(Vessel v)
+        private bool SortaLanded(Vessel v)
         {
             return v.mainBody.GetAltitude(v.CoM) - Math.Max(v.terrainAltitude, 0) < 100;
         }
@@ -221,11 +217,6 @@ namespace PhysicsRangeExtender
         {
             s.wheelThrottle = 0;
             s.mainThrottle = 0;
-        }
-
-        public static void ExtendForNewVessel()
-        {
-            ExecuteTerrainExtender = true;
         }
     }
 }
