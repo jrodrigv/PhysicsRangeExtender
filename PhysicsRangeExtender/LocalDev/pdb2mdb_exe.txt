@@ -1,1 +1,1 @@
-E:\pdb2mdb\pdb2mdb.exe
+I:\pdb2mdb
