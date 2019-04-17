@@ -243,6 +243,11 @@ namespace PhysicsRangeExtender
             Debug.Log("[PhysicsRangeExtender]:  Updating ranges");
             FloatingOrigin.fetch.threshold = Mathf.Pow(PreSettings.GlobalRange * 1000 * 1.20f, 2);
 
+            if (updatingFromUi)
+            {
+                TerrainExtender.UpdateSphere();
+            }
+
             _globalSituation = new VesselRanges.Situation(
                 load: PreSettings.GlobalRange * 1000,
                 unload: PreSettings.GlobalRange * 1000 * 1.05f,

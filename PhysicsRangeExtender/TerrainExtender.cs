@@ -27,10 +27,16 @@ namespace PhysicsRangeExtender
         public static void UpdateSphere()
         {
             var pqs = FlightGlobals.currentMainBody.pqsController;
-            pqs.horizonDistance = PreSettings.GlobalRange * 1000f * 1.15;
-            pqs.maxDetailDistance = PreSettings.GlobalRange * 1000f * 1.15;
-            pqs.minDetailDistance = PreSettings.GlobalRange * 1000f * 1.15;
 
+            pqs.horizonDistance = Double.MaxValue;
+            pqs.maxDetailDistance =  Double.MaxValue;
+            pqs.minDetailDistance = Double.MaxValue;
+            pqs.detailAltitudeMax = Mathf.Max(PreSettings.GlobalRange * 1000f, 100000);
+            pqs.visRadAltitudeMax = Mathf.Max(PreSettings.GlobalRange * 1000f, 100000);
+            pqs.collapseAltitudeMax = Mathf.Max(PreSettings.GlobalRange * 1000f, 100000) *10;
+            pqs.detailSeaLevelQuads = 3000.0 * Mathf.Max(PreSettings.GlobalRange * 1000f, 100000) / 100000;
+            pqs.detailAltitudeQuads = 3000.0 * Mathf.Max(PreSettings.GlobalRange * 1000f, 100000) / 100000;
+            pqs.maxQuadLenghtsPerFrame = (float) (pqs.detailSeaLevelQuads / pqs.detailAltitudeMax);
             pqs.visRadSeaLevelValue = 200;
             pqs.collapseSeaLevelValue = 200;
             pqs.StartUpSphere();
