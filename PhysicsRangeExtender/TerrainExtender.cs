@@ -51,9 +51,9 @@ namespace PhysicsRangeExtender
 
                 List<Vessel> listOfVessels = new List<Vessel>();
 
-                if(PhysicsRangeExtender.VesselToFreeze.Count > 0)
+                if(PhysicsRangeExtender.VesselToLift.Count > 0)
                 {
-                    listOfVessels = PhysicsRangeExtender.VesselToFreeze;
+                    listOfVessels = PhysicsRangeExtender.VesselToLift;
                 }
                 else
                 {
@@ -111,7 +111,7 @@ namespace PhysicsRangeExtender
             if (!PreSettings.ModEnabled) return;
             if (!PreSettings.TerrainExtenderEnabled) return;
 
-            if (PhysicsRangeExtender.VesselToFreeze.Count > 0 && !_loading)
+            if (PhysicsRangeExtender.VesselToLift.Count > 0 && !_loading)
             {
                 ResetParameters();
             }
@@ -140,9 +140,9 @@ namespace PhysicsRangeExtender
             switch (_stage)
             {
                 case 0:
-                    if (PhysicsRangeExtender.VesselToFreeze.Count > 0)
+                    if (PhysicsRangeExtender.VesselToLift.Count > 0)
                     {
-                        _vesEnume = PhysicsRangeExtender.VesselToFreeze.ToList().GetEnumerator();
+                        _vesEnume = PhysicsRangeExtender.VesselToLift.ToList().GetEnumerator();
                     }
                     else
                     {
@@ -159,7 +159,7 @@ namespace PhysicsRangeExtender
                         if (SortaLanded(_vesEnume.Current))
                             FlightGlobals.ForceSetActiveVessel(_vesEnume.Current);
 
-                        if (PhysicsRangeExtender.VesselToFreeze.Count > 0 && Time.time - lastsphererefresh > 30)
+                        if (PhysicsRangeExtender.VesselToLift.Count > 0 && Time.time - lastsphererefresh > 30)
                         {
                             UpdateSphere();
                             lastsphererefresh = Time.time;
@@ -195,7 +195,7 @@ namespace PhysicsRangeExtender
                     CheatOptions.NoCrashDamage = _crashDamage;
                     CheatOptions.UnbreakableJoints = _joints;
                     _loading = false;
-                    PhysicsRangeExtender.VesselToFreeze.Clear();
+                    PhysicsRangeExtender.VesselToLift.Clear();
                     ScreenMessages.PostScreenMessage(
                         "[PhysicsRangeExtender]Extending terrain distance: complete.", 3f,
                         ScreenMessageStyle.UPPER_CENTER);

@@ -30,7 +30,9 @@ namespace PhysicsRangeExtender
             public LandedVesselsStates State { get; set; }
         }
 
-        public static List<Vessel> VesselToFreeze { get; set; } = new List<Vessel>();
+        public static List<Vessel> VesselToLift { get; set; } = new List<Vessel>();
+
+        public List<Vessel> VesselToFreeze { get; set; } = new List<Vessel>();
 
         void Start()
         {
@@ -44,17 +46,29 @@ namespace PhysicsRangeExtender
             GameEvents.onVesselLoaded.Add(ApplyPhysRangeOnLoad);
             GameEvents.onVesselSwitching.Add(ApplyPhysRange);
             GameEvents.onVesselGoOffRails.Add(ApplyPhysRange);
-            GameEvents.onVesselSituationChange.Add(TryFixMap);
+            GameEvents.onVesselSituationChange.Add(SituationChangeFixes);
         }
 
-        private void TryFixMap(GameEvents.HostedFromToAction<Vessel, Vessel.Situations> data)
+        private void SituationChangeFixes(GameEvents.HostedFromToAction<Vessel, Vessel.Situations> data)
         {
-            if (FlightGlobals.VesselsLoaded.Count(x => x.Landed) >= 1) return;
+            RefreshPqsWhenApproaching(data);
+            PreventVesselsAboutToLandToBeDestroyed(data);
+        }
 
+        private void PreventVesselsAboutToLandToBeDestroyed(GameEvents.HostedFromToAction<Vessel, Vessel.Situations> data)
+        {
+            if (!data.host.isActiveVessel && data.from == Vessel.Situations.FLYING && data.to == Vessel.Situations.LANDED && FlightGlobals.ActiveVessel.situation == Vessel.Situations.SUB_ORBITAL)
+            {
+                VesselToFreeze.Add(data.host);
+            }
+        }
+
+        private void RefreshPqsWhenApproaching(GameEvents.HostedFromToAction<Vessel, Vessel.Situations> data)
+        {
             var curVessel = data.host;
             if (!curVessel.mainBody.isHomeWorld || !curVessel.isActiveVessel) return;
 
-            if (data.from == Vessel.Situations.FLYING && data.to == Vessel.Situations.SUB_ORBITAL)
+            if (data.@from == Vessel.Situations.FLYING && data.to == Vessel.Situations.SUB_ORBITAL)
             {
                 _isSuborbital = true;
             }
@@ -80,7 +94,7 @@ namespace PhysicsRangeExtender
             GameEvents.onVesselLoaded.Remove(ApplyPhysRangeOnLoad);
             GameEvents.onVesselSwitching.Remove(ApplyPhysRange);
             GameEvents.onVesselGoOffRails.Remove(ApplyPhysRange);
-            GameEvents.onVesselSituationChange.Add(TryFixMap);
+            GameEvents.onVesselSituationChange.Add(SituationChangeFixes);
         }
 
  
@@ -88,14 +102,23 @@ namespace PhysicsRangeExtender
         {
             if (vessel!= null && !vessel.isActiveVessel && vessel.Landed && FlightGlobals.ActiveVessel.situation == Vessel.Situations.SUB_ORBITAL)
             {
-                VesselToFreeze.Add(vessel);
+                VesselToLift.Add(vessel);
             }
         }
 
             
         private void ApplyPhysRange(Vessel data0, Vessel data1)
         {
+            CheckIfFreezeIsNeeded(data0, data1);
             ApplyRangesToVessels();
+        }
+
+        private void CheckIfFreezeIsNeeded(Vessel from, Vessel to)
+        {
+            if (from.Landed && (to.situation >= Vessel.Situations.SUB_ORBITAL))
+            {
+                VesselToFreeze.AddRange(FlightGlobals.VesselsLoaded.Where(x=> x.Landed));
+            }
         }
 
         private void ApplyPhysRange(Vessel data)
@@ -152,6 +175,13 @@ namespace PhysicsRangeExtender
             if (!PreSettings.ModEnabled) return;
             UpdateNearClipPlane();
             AvoidReferenceFrameChangeIssues();
+            FreezeLandedVesselWhenSwitching();
+        }
+
+        private void FreezeLandedVesselWhenSwitching()
+        {
+            this.VesselToFreeze.RemoveAll(x => !x.loaded);
+            this.VesselToFreeze.ForEach(x => x?.SetWorldVelocity(Vector3d.zero));
         }
 
         private void AvoidReferenceFrameChangeIssues()

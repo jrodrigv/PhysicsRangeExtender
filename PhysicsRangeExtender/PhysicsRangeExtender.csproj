@@ -55,7 +55,6 @@
   <ItemGroup>
     <Compile Include="Gui.cs" />
     <Compile Include="PhysicsRangeExtender.cs" />
-    <Compile Include="PQSData.cs" />
     <Compile Include="PreSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TerrainExtender.cs" />
