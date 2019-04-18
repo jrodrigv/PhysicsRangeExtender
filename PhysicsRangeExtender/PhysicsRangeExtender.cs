@@ -59,6 +59,7 @@ namespace PhysicsRangeExtender
         {
             if (!data.host.isActiveVessel && data.from == Vessel.Situations.FLYING && data.to == Vessel.Situations.LANDED && FlightGlobals.ActiveVessel.situation == Vessel.Situations.SUB_ORBITAL)
             {
+                TerrainExtender.ActivateNoCrashDamage();
                 VesselToFreeze.Add(data.host);
             }
         }
@@ -117,6 +118,7 @@ namespace PhysicsRangeExtender
         {
             if (from.Landed && (to.situation >= Vessel.Situations.SUB_ORBITAL))
             {
+                TerrainExtender.ActivateNoCrashDamage();
                 VesselToFreeze.AddRange(FlightGlobals.VesselsLoaded.Where(x=> x.Landed));
             }
         }
@@ -181,6 +183,11 @@ namespace PhysicsRangeExtender
         private void FreezeLandedVesselWhenSwitching()
         {
             this.VesselToFreeze.RemoveAll(x => !x.loaded);
+
+            if (VesselToFreeze.Count == 0)
+            {
+                TerrainExtender.DeactivateNoCrashDamage();
+            }
             this.VesselToFreeze.ForEach(x => x?.SetWorldVelocity(Vector3d.zero));
         }
 

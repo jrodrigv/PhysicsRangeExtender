@@ -12,14 +12,14 @@ namespace PhysicsRangeExtender
     public class TerrainExtender : MonoBehaviour
     {
         private const int VesLoad = 13;
-        private bool _crashDamage;
-        private bool _joints;
+        private static bool _crashDamage;
+        private static bool _joints;
+
         private bool _loading = true;
         private int _reset = 111;
         private int _stage;
         private Vessel _tvel;
         private IEnumerator<Vessel> _vesEnume;
-        public static bool ExecuteTerrainExtender { get; set; }
 
         private double lastsphererefresh = 0;
 
@@ -89,8 +89,6 @@ namespace PhysicsRangeExtender
                 // ignored
             }
         }
-
-
 
         void FixedUpdate() => Apply();
         void LateUpdate() => Apply();
@@ -192,8 +190,7 @@ namespace PhysicsRangeExtender
                     ++_stage;
                     break;
                 case 4:
-                    CheatOptions.NoCrashDamage = _crashDamage;
-                    CheatOptions.UnbreakableJoints = _joints;
+                    DeactivateNoCrashDamage();
                     _loading = false;
                     PhysicsRangeExtender.VesselToLift.Clear();
                     ScreenMessages.PostScreenMessage(
@@ -203,11 +200,22 @@ namespace PhysicsRangeExtender
             }
         }
 
+        public static void DeactivateNoCrashDamage()
+        {
+            CheatOptions.NoCrashDamage = _crashDamage;
+            CheatOptions.UnbreakableJoints = _joints;  
+        }
+
         private void Awake()
         {
             if (!PreSettings.ModEnabled) return;
             if (!PreSettings.TerrainExtenderEnabled) return;
 
+            ActivateNoCrashDamage();
+        }
+
+        public static void ActivateNoCrashDamage()
+        {
             _crashDamage = CheatOptions.NoCrashDamage;
             _joints = CheatOptions.UnbreakableJoints;
             CheatOptions.NoCrashDamage = true;
