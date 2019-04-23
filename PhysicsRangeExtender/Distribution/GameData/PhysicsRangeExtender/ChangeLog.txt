@@ -1,3 +1,6 @@
+= v1.11.0
+- Full rework of Terrain Extender to enable reusability of boosters.
+
 = v1.10.0
 - Recompiled for KSP 1.7.0
 - Fixed critical issue which make landed vessel to crash through the ground when entering into physics range. 
