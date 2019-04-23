@@ -15,23 +15,6 @@ namespace PhysicsRangeExtender
         private static float _initialClippingPlane = 0.21f;
         private bool _isSuborbital;
 
-
-        public enum LandedVesselsStates
-        {
-           NotFocused,
-           Focused
-        }
-
-
-        public class LandedVesselData
-        {
-            public Vessel Vessel { get; set; }
-            public double Time { get; set; }
-            public LandedVesselsStates State { get; set; }
-        }
-
-        public static List<Vessel> VesselToLift { get; set; } = new List<Vessel>();
-
         public List<Vessel> VesselToFreeze { get; set; } = new List<Vessel>();
 
         void Start()
@@ -52,17 +35,8 @@ namespace PhysicsRangeExtender
         private void SituationChangeFixes(GameEvents.HostedFromToAction<Vessel, Vessel.Situations> data)
         {
             RefreshPqsWhenApproaching(data);
-            PreventVesselsAboutToLandToBeDestroyed(data);
         }
 
-        private void PreventVesselsAboutToLandToBeDestroyed(GameEvents.HostedFromToAction<Vessel, Vessel.Situations> data)
-        {
-            if (!data.host.isActiveVessel && data.from == Vessel.Situations.FLYING && data.to == Vessel.Situations.LANDED && FlightGlobals.ActiveVessel.situation == Vessel.Situations.SUB_ORBITAL)
-            {
-                TerrainExtender.ActivateNoCrashDamage();
-                VesselToFreeze.Add(data.host);
-            }
-        }
 
         private void RefreshPqsWhenApproaching(GameEvents.HostedFromToAction<Vessel, Vessel.Situations> data)
         {
@@ -101,9 +75,12 @@ namespace PhysicsRangeExtender
  
         private void NewVesselIsLoaded(Vessel vessel)
         {
-            if (vessel!= null && !vessel.isActiveVessel && vessel.Landed && FlightGlobals.ActiveVessel.situation == Vessel.Situations.SUB_ORBITAL)
+            if (vessel!= null && !vessel.isActiveVessel && vessel.Landed && FlightGlobals.ActiveVessel.situation == Vessel.Situations.SUB_ORBITAL && vessel.vesselType != VesselType.Debris)
             {
-                VesselToLift.Add(vessel);
+                if (TerrainExtender.vesselsLandedToLoad.All(x => x.Vessel.id != vessel.id))
+                {
+                    TerrainExtender.vesselsLandedToLoad.Add(new TerrainExtender.VesselLandedState() { Vessel = vessel, InitialAltitude = vessel.altitude, LandedState = TerrainExtender.LandedVesselsStates.NotFocused });
+                }    
             }
         }
 
@@ -116,7 +93,7 @@ namespace PhysicsRangeExtender
 
         private void CheckIfFreezeIsNeeded(Vessel from, Vessel to)
         {
-            if (from.Landed && (to.situation >= Vessel.Situations.SUB_ORBITAL))
+            if (from.Landed && to.altitude > FlightGlobals.ActiveVessel.orbit.referenceBody.inverseRotThresholdAltitude * 0.95f)
             {
                 TerrainExtender.ActivateNoCrashDamage();
                 VesselToFreeze.AddRange(FlightGlobals.VesselsLoaded.Where(x=> x.Landed));

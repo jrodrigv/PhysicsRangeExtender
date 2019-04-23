@@ -11,18 +11,30 @@ namespace PhysicsRangeExtender
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class TerrainExtender : MonoBehaviour
     {
-        private const int VesLoad = 13;
         private static bool _crashDamage;
         private static bool _joints;
 
-        private bool _loading = true;
-        private int _reset = 111;
-        private int _stage;
+        private bool _loading = false;
         private Vessel _tvel;
-        private IEnumerator<Vessel> _vesEnume;
+        private bool initialLoading = false;
 
-        private double lastsphererefresh = 0;
 
+        public enum LandedVesselsStates
+        {
+            NotFocused,
+            Focused,
+            Lifted,
+            Landed
+        }
+
+        public class VesselLandedState
+        {
+            public Vessel Vessel { get; set; }
+            public LandedVesselsStates LandedState  { get; set; }
+            public double InitialAltitude { get; set; }
+        }
+
+        public static List<VesselLandedState> vesselsLandedToLoad { get; set; } = new List<VesselLandedState>();
 
         public static void UpdateSphere()
         {
@@ -42,56 +54,116 @@ namespace PhysicsRangeExtender
             pqs.StartUpSphere();
         }
 
-        private void ExtendTerrainDistance()
+        void FixedUpdate()
         {
-            try
-            {
-                if (!_loading) return;
+            if (!PreSettings.ConfigLoaded) return;
+            if (!PreSettings.ModEnabled) return;
+            if (!PreSettings.TerrainExtenderEnabled) return;
+            if (!FlightGlobals.ready) return;
 
 
-                List<Vessel> listOfVessels = new List<Vessel>();
-
-                if(PhysicsRangeExtender.VesselToLift.Count > 0)
-                {
-                    listOfVessels = PhysicsRangeExtender.VesselToLift;
-                }
-                else
-                {
-                    listOfVessels = FlightGlobals.VesselsLoaded;
-                }
-
-                using (var v = listOfVessels.GetEnumerator())
-                {
-                    while (v.MoveNext())
-                    {
-                        if (v.Current == null) continue;
-                        if (!SortaLanded(v.Current)) return;
-                        switch (_stage)
-                        {
-                            case 0:
-                                v.Current?.SetWorldVelocity(v.Current.gravityForPos * -4 * Time.fixedDeltaTime);
-                                break;
-                            case 1:
-                                v.Current?.SetWorldVelocity(v.Current.gravityForPos * -2 * Time.fixedDeltaTime);
-                                break;
-                            case 4:
-                                v.Current?.SetWorldVelocity(v.Current.velocityD / 2);
-                                break;
-                            default:
-                                v.Current?.SetWorldVelocity(Vector3d.zero);
-                                break;
-                        }
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
+            ExtendTerrainForLandedVessels();
         }
 
-        void FixedUpdate() => Apply();
-        void LateUpdate() => Apply();
+        private void ExtendTerrainForLandedVessels()
+        {
+            //if (FlightGlobals.currentMainBody.pqsController.isBuildingMaps) return;
+
+            InitialFetch();
+           
+            if (vesselsLandedToLoad.Count == 0) return;
+
+            if (!_loading)
+            {
+                _loading = true;
+                ActivateNoCrashDamage();
+
+                _tvel = FlightGlobals.ActiveVessel;
+            }
+
+            foreach (var currentVesselData in vesselsLandedToLoad)
+            {
+                var currentVessel = currentVesselData.Vessel;
+
+                if(currentVessel == null) continue;  
+                if (!SortaLanded(currentVessel)) continue;
+
+                switch (currentVesselData.LandedState)
+                {
+                    case LandedVesselsStates.NotFocused:
+                        FlightGlobals.ForceSetActiveVessel(currentVessel);
+
+                        UpdateSphere();
+
+                        currentVesselData.LandedState = LandedVesselsStates.Focused;
+
+                        currentVessel.SetWorldVelocity(currentVessel.gravityForPos * -8 * Time.fixedDeltaTime);
+                        break;
+                    case LandedVesselsStates.Focused:
+
+                        if (currentVessel.altitude - currentVesselData.InitialAltitude >= 3d)
+                        {
+                            currentVesselData.LandedState = LandedVesselsStates.Lifted;
+                        }
+                        else
+                        {
+                            currentVessel.SetWorldVelocity(currentVessel.gravityForPos * -8 * Time.fixedDeltaTime);
+                        }
+                        break;
+                    case LandedVesselsStates.Lifted:
+
+                        if (!currentVessel.Landed)
+                        {
+                            currentVessel.SetWorldVelocity(currentVessel.gravityForPos * 0.75f * Time.fixedDeltaTime);
+                        }
+                        else
+                        {
+                            currentVessel.SetWorldVelocity(Vector3.zero);
+                            currentVesselData.LandedState = LandedVesselsStates.Landed;
+                        }
+
+                        break;
+                    case LandedVesselsStates.Landed:
+                        currentVessel.SetWorldVelocity(Vector3.zero);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            vesselsLandedToLoad.RemoveAll(x => x.LandedState == LandedVesselsStates.Landed);
+
+            if (vesselsLandedToLoad.Count == 0)
+            {
+                FlightGlobals.ForceSetActiveVessel(_tvel);
+                DeactivateNoCrashDamage();
+                _loading = false;
+            }
+
+        }
+
+        private void InitialFetch()
+        {
+            if (initialLoading && FlightGlobals.VesselsLoaded.Count > 1)
+            {
+                foreach (var vessel in FlightGlobals.VesselsLoaded)
+                {
+                    if(vesselsLandedToLoad.Any(x => x.Vessel.id == vessel.id)) continue;
+                    
+                    if (!vessel.isActiveVessel && vessel.Landed && vessel.vesselType != VesselType.Debris)
+                    {
+                        vesselsLandedToLoad.Add(new VesselLandedState()
+                        {
+                            InitialAltitude = vessel.altitude,
+                            LandedState = LandedVesselsStates.NotFocused,
+                            Vessel = vessel
+                        });
+                    }
+                }
+
+                initialLoading = false;
+            }
+        }
 
         private void Update()
         {
@@ -99,104 +171,58 @@ namespace PhysicsRangeExtender
             if (!PreSettings.ModEnabled) return;
             if (!PreSettings.TerrainExtenderEnabled) return;
 
-            ExtendTerrainDistance();
-            EaseLoadingForExtendedRange();
+            ShowMessageTerrainStatus();
         }
 
-        private void Apply()
+        private void ShowMessageTerrainStatus()
         {
-            if (!PreSettings.ConfigLoaded) return;
-            if (!PreSettings.ModEnabled) return;
-            if (!PreSettings.TerrainExtenderEnabled) return;
+            if (vesselsLandedToLoad.Count == 0) return;
 
-            if (PhysicsRangeExtender.VesselToLift.Count > 0 && !_loading)
+
+            LandedVesselsStates overrallStatus = LandedVesselsStates.NotFocused;
+
+            if (vesselsLandedToLoad.Any(x => x.LandedState == LandedVesselsStates.NotFocused))
             {
-                ResetParameters();
+                overrallStatus = LandedVesselsStates.NotFocused;
+
             }
-            ExtendTerrainDistance();
-        }
-        private void ResetParameters()
-        {
-            _loading = true;
-            _reset = 111;
-            _stage = 0;
-            _crashDamage = CheatOptions.NoCrashDamage;
-            _joints = CheatOptions.UnbreakableJoints;
-            CheatOptions.NoCrashDamage = true;
-            CheatOptions.UnbreakableJoints = true;
-        }
-
-        private void EaseLoadingForExtendedRange()
-        {
-            if (!_loading) return;
-
-            if (!FlightGlobals.currentMainBody.pqsController.isBuildingMaps)
-                --_reset;
-            if (_reset > 0) return;
-            _reset = VesLoad;
-
-            switch (_stage)
+            else if(vesselsLandedToLoad.Any(x => x.LandedState == LandedVesselsStates.Focused))
             {
-                case 0:
-                    if (PhysicsRangeExtender.VesselToLift.Count > 0)
-                    {
-                        _vesEnume = PhysicsRangeExtender.VesselToLift.ToList().GetEnumerator();
-                    }
-                    else
-                    {
-                        _vesEnume = FlightGlobals.VesselsLoaded.ToList().GetEnumerator();
-                    }
-                    _tvel = FlightGlobals.ActiveVessel;
-                    ++_stage;
-                    break;
-                case 1:
-                    if (_vesEnume.Current != null)
-                        _vesEnume.Current.OnFlyByWire -= Thratlarasat;
-                    if (_vesEnume.MoveNext())
-                    {
-                        if (SortaLanded(_vesEnume.Current))
-                            FlightGlobals.ForceSetActiveVessel(_vesEnume.Current);
+                overrallStatus = LandedVesselsStates.Focused;
+            }
+            else if (vesselsLandedToLoad.Any(x => x.LandedState == LandedVesselsStates.Lifted))
+            {
+                overrallStatus = LandedVesselsStates.Lifted;
+            }
+            else if (vesselsLandedToLoad.Any(x => x.LandedState == LandedVesselsStates.Landed))
+            {
+                overrallStatus = LandedVesselsStates.Landed;
+            }
 
-                        if (PhysicsRangeExtender.VesselToLift.Count > 0 && Time.time - lastsphererefresh > 30)
-                        {
-                            UpdateSphere();
-                            lastsphererefresh = Time.time;
-                        }
-                            _vesEnume.Current.OnFlyByWire += Thratlarasat;
-                    }
-                    else
-                    {
-                        _vesEnume.Dispose();
-                        ++_stage;
-                        FlightGlobals.ForceSetActiveVessel(_tvel);
-                    }
-
+            switch (overrallStatus)
+            {
+                case LandedVesselsStates.NotFocused:
                     ScreenMessages.PostScreenMessage(
-                        "[PhysicsRangeExtender]Extending terrain distance: entangling.", 3f,
-                        ScreenMessageStyle.UPPER_CENTER);
-                    Debug.LogError($"Black Spell entangling {_vesEnume.Current?.vesselName}");
-                    break;
-                case 2:
-                    ScreenMessages.PostScreenMessage(
-                        "[PhysicsRangeExtender]Extending terrain distance: condensing.", 3f,
-                        ScreenMessageStyle.UPPER_CENTER);
-                    ++_stage;
-                    break;
-                case 3:
-                    ScreenMessages.PostScreenMessage(
-                        "[PhysicsRangeExtender]Extending terrain distance: releasing energies.", 3f,
-                        ScreenMessageStyle.UPPER_CENTER);
-                    _reset = 100;
-                    ++_stage;
-                    break;
-                case 4:
-                    DeactivateNoCrashDamage();
-                    _loading = false;
-                    PhysicsRangeExtender.VesselToLift.Clear();
-                    ScreenMessages.PostScreenMessage(
-                        "[PhysicsRangeExtender]Extending terrain distance: complete.", 3f,
+                        "[PhysicsRangeExtender]Extending terrain: focusing landed vessels.", 3f,
                         ScreenMessageStyle.UPPER_CENTER);
                     break;
+                case LandedVesselsStates.Focused:
+                    ScreenMessages.PostScreenMessage(
+                        "[PhysicsRangeExtender]Extending terrain: lifting vessels.", 3f,
+                        ScreenMessageStyle.UPPER_CENTER);
+                    break;
+                case LandedVesselsStates.Lifted:
+                    ScreenMessages.PostScreenMessage(
+                        "[PhysicsRangeExtender]Extending terrain: landing vessels.", 3f,
+                        ScreenMessageStyle.UPPER_CENTER);
+                    break;
+                case LandedVesselsStates.Landed:
+                    ScreenMessages.PostScreenMessage(
+                        "[PhysicsRangeExtender]Extending terrain: switching to previous vessel.", 3f,
+                        ScreenMessageStyle.UPPER_CENTER);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -206,12 +232,14 @@ namespace PhysicsRangeExtender
             CheatOptions.UnbreakableJoints = _joints;  
         }
 
-        private void Awake()
+
+        void Start()
         {
             if (!PreSettings.ModEnabled) return;
             if (!PreSettings.TerrainExtenderEnabled) return;
 
-            ActivateNoCrashDamage();
+            this.initialLoading = true;
+
         }
 
         public static void ActivateNoCrashDamage()
