@@ -93,10 +93,12 @@ namespace PhysicsRangeExtender
 
         private void CheckIfFreezeIsNeeded(Vessel from, Vessel to)
         {
-            if (from.Landed && to.altitude > FlightGlobals.ActiveVessel.orbit.referenceBody.inverseRotThresholdAltitude * 0.95f)
+            if (from.Landed && to.situation >= Vessel.Situations.SUB_ORBITAL)
             {
                 TerrainExtender.ActivateNoCrashDamage();
-                VesselToFreeze.AddRange(FlightGlobals.VesselsLoaded.Where(x=> x.Landed));
+                from.SetWorldVelocity(Vector3d.zero);
+                VesselToFreeze.Add(from);
+                VesselToFreeze.AddRange(FlightGlobals.VesselsLoaded.Where(x=> x.LandedOrSplashed));
             }
         }
 
@@ -111,6 +113,8 @@ namespace PhysicsRangeExtender
         {
             if (!PreSettings.ModEnabled) return;
             UpdateNearClipPlane();
+            AvoidReferenceFrameChangeIssues();
+            FreezeLandedVesselWhenSwitching();
         }
 
         private void UpdateNearClipPlane()
@@ -147,6 +151,8 @@ namespace PhysicsRangeExtender
             if (!PreSettings.ConfigLoaded) return;
             if (!PreSettings.ModEnabled) return;
             UpdateNearClipPlane();
+            AvoidReferenceFrameChangeIssues();
+            FreezeLandedVesselWhenSwitching();
         }
         void FixedUpdate()
         {
@@ -159,6 +165,7 @@ namespace PhysicsRangeExtender
 
         private void FreezeLandedVesselWhenSwitching()
         {
+            this.VesselToFreeze.RemoveAll(x => x == null);
             this.VesselToFreeze.RemoveAll(x => !x.loaded);
 
             if (VesselToFreeze.Count == 0)
