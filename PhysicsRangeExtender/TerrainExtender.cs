@@ -144,7 +144,7 @@ namespace PhysicsRangeExtender
 
         private void InitialFetch()
         {
-            if (initialLoading && FlightGlobals.VesselsLoaded.Count > 1)
+            if (initialLoading && FlightGlobals.VesselsLoaded.Count >= 1)
             {
                 foreach (var vessel in FlightGlobals.VesselsLoaded)
                 {
