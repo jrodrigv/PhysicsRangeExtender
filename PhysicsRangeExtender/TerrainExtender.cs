@@ -85,12 +85,13 @@ namespace PhysicsRangeExtender
             {
                 var currentVessel = currentVesselData.Vessel;
 
-                if(currentVessel == null) continue;  
+                if (currentVessel == null) continue;  
                 if (!SortaLanded(currentVessel)) continue;
 
                 switch (currentVesselData.LandedState)
                 {
                     case LandedVesselsStates.NotFocused:
+
                         FlightGlobals.ForceSetActiveVessel(currentVessel);
 
                         UpdateSphere();
@@ -100,7 +101,7 @@ namespace PhysicsRangeExtender
                         currentVessel.SetWorldVelocity(currentVessel.gravityForPos * -8 * Time.fixedDeltaTime);
                         break;
                     case LandedVesselsStates.Focused:
-
+                     
                         if (currentVessel.altitude - currentVesselData.InitialAltitude >= 3d)
                         {
                             currentVesselData.LandedState = LandedVesselsStates.Lifted;
@@ -111,7 +112,7 @@ namespace PhysicsRangeExtender
                         }
                         break;
                     case LandedVesselsStates.Lifted:
-
+                
                         if (!currentVessel.Landed)
                         {
                             currentVessel.SetWorldVelocity(currentVessel.gravityForPos * 0.75f * Time.fixedDeltaTime);
@@ -150,7 +151,7 @@ namespace PhysicsRangeExtender
                 {
                     if(vesselsLandedToLoad.Any(x => x.Vessel.id == vessel.id)) continue;
                     
-                    if (!vessel.isActiveVessel && vessel.Landed && vessel.vesselType != VesselType.Debris)
+                    if (!vessel.isActiveVessel && (vessel.Landed || SortaLanded(vessel)) && vessel.vesselType != VesselType.Debris)
                     {
                         vesselsLandedToLoad.Add(new VesselLandedState()
                         {

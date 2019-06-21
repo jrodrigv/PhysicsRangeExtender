@@ -75,7 +75,7 @@ namespace PhysicsRangeExtender
  
         private void NewVesselIsLoaded(Vessel vessel)
         {
-            if (vessel!= null && !vessel.isActiveVessel && vessel.Landed && FlightGlobals.ActiveVessel.situation == Vessel.Situations.SUB_ORBITAL && vessel.vesselType != VesselType.Debris)
+            if (vessel!= null && !vessel.isActiveVessel && vessel.Landed && vessel.vesselType != VesselType.Debris)
             {
                 if (TerrainExtender.vesselsLandedToLoad.All(x => x.Vessel.id != vessel.id))
                 {
