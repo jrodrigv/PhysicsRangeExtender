@@ -20,7 +20,7 @@ namespace PhysicsRangeExtender
         private readonly float _incrButtonWidth = 26;
         private readonly float contentWidth = WindowWidth - 2 * LeftIndent;
         private readonly float entryHeight = 20;
-        private float _contentWidth;
+        
         private bool _gameUiToggle;
         private string _guiGlobalRangeForVessels = String.Empty;
 
@@ -59,7 +59,7 @@ namespace PhysicsRangeExtender
         {
             GUI.DragWindow(new Rect(0, 0, WindowWidth, DraggableHeight));
             float line = 0;
-            _contentWidth = WindowWidth - 2 * LeftIndent;
+           
 
             DrawTitle();
             line++;
