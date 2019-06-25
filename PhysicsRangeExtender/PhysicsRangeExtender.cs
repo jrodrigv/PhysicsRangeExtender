@@ -105,7 +105,7 @@ namespace PhysicsRangeExtender
             }
         }
 
-        private static void ApplyPhysRange(Vessel data)
+        private void ApplyPhysRange(Vessel data)
         {
             ApplyRangesToVessels();
         }
