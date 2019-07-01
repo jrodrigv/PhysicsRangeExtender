@@ -59,7 +59,7 @@ namespace PhysicsRangeExtender
 
         private void ExtendTerrainForLandedVessels()
         {
-            //if (FlightGlobals.currentMainBody.pqsController.isBuildingMaps) return;
+            if (FlightGlobals.currentMainBody.pqsController.isBuildingMaps) return;
 
             InitialFetch();
 
@@ -103,7 +103,7 @@ namespace PhysicsRangeExtender
 
                         if (!currentVessel.Landed)
                         {
-                            currentVessel.SetWorldVelocity(currentVessel.gravityForPos * 0.75f * Time.fixedDeltaTime);
+                            currentVessel.SetWorldVelocity(currentVessel.gravityForPos.normalized* 2.0f  *Time.fixedDeltaTime);
                         }
                         else
                         {
@@ -122,9 +122,13 @@ namespace PhysicsRangeExtender
 
             vesselsLandedToLoad.RemoveAll(x => x.LandedState == LandedVesselsStates.Landed);
 
-            if (vesselsLandedToLoad.Count == 0)
+            if (FlightGlobals.ActiveVessel != _tvel && vesselsLandedToLoad.All(x => x.LandedState != LandedVesselsStates.NotFocused))
             {
                 FlightGlobals.ForceSetActiveVessel(_tvel);
+            }
+
+            if (vesselsLandedToLoad.Count == 0)
+            {
                 DeactivateNoCrashDamage();
                 _loading = false;
             }
@@ -138,7 +142,7 @@ namespace PhysicsRangeExtender
                 {
                     if (vesselsLandedToLoad.Any(x => x.Vessel.id == vessel.id)) continue;
 
-                    if (!vessel.isActiveVessel && (vessel.Landed || SortaLanded(vessel)) &&
+                    if ((vessel.Landed || SortaLanded(vessel)) &&
                         vessel.vesselType != VesselType.Debris)
                         vesselsLandedToLoad.Add(new VesselLandedState
                         {
