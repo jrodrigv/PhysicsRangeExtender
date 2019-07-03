@@ -1,3 +1,7 @@
+= v1.14.0
+- Hotfixes for KSP 1.7.2.
+- Flickering improvements for low altitude vessels.
+
 = v1.13.0
 - Fixes to terrain extender to avoid landed vessels to crash.
 - Recompiled for KSP 1.7.2
