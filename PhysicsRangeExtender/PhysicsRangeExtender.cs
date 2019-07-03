@@ -122,7 +122,7 @@ namespace PhysicsRangeExtender
         private void UpdateNearClipPlane()
         {
             if (FlightGlobals.VesselsLoaded.Count > 1 &&
-                FlightGlobals.VesselsLoaded.Count(x => x.LandedOrSplashed) >= 1)
+                FlightGlobals.VesselsLoaded.Count(TerrainExtender.SortaLanded) >= 1)
             {
                 var distanceMultiplier =
                     _initialClippingPlane *

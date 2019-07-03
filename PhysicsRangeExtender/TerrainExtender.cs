@@ -263,7 +263,7 @@ namespace PhysicsRangeExtender
             CheatOptions.UnbreakableJoints = true;
         }
 
-        private bool SortaLanded(Vessel v)
+        public static bool SortaLanded(Vessel v)
         {
             return v.mainBody.GetAltitude(v.CoM) - Math.Max(v.terrainAltitude, 0) < 100;
         }
