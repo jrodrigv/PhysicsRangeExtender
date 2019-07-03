@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using UnityEngine;
 
 namespace PhysicsRangeExtender
 {
-    /// <summary>
-    ///     Code from https://github.com/Gedas-S/PQSBS Thanks to Gedas for this!
-    /// </summary>
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class TerrainExtender : MonoBehaviour
     {
         public enum LandedVesselsStates
         {
             NotFocused,
+            Focusing,
             Focused,
             Lifted,
             Landed
@@ -65,6 +64,8 @@ namespace PhysicsRangeExtender
 
             if (vesselsLandedToLoad.Count == 0) return;
 
+            vesselsLandedToLoad.RemoveAll(x => x.Vessel == null);
+
             if (!_loading)
             {
                 _loading = true;
@@ -84,26 +85,46 @@ namespace PhysicsRangeExtender
                 {
                     case LandedVesselsStates.NotFocused:
 
-                        FlightGlobals.ForceSetActiveVessel(currentVessel);
+                        //UpdateSphere();
+                        if (currentVesselData.Vessel != _tvel)
+                        {
+                            FlightGlobals.ForceSetActiveVessel(currentVessel);
+                            currentVesselData.LandedState = LandedVesselsStates.Focusing;
+                            currentVesselData.TimeOfState = Time.time;
+                        }
+                        else
+                        {
+                            currentVesselData.LandedState = LandedVesselsStates.Focused;
+                        }
+                        currentVessel.SetWorldVelocity(currentVessel.gravityForPos * -8 * Time.fixedDeltaTime);
+                        break;
+                    case LandedVesselsStates.Focusing:
 
-                        UpdateSphere();
-
-                        currentVesselData.LandedState = LandedVesselsStates.Focused;
-
+                        if (Time.time - currentVesselData.TimeOfState > 2)
+                        {
+                            currentVesselData.LandedState = LandedVesselsStates.Focused;
+                        }
                         currentVessel.SetWorldVelocity(currentVessel.gravityForPos * -8 * Time.fixedDeltaTime);
                         break;
                     case LandedVesselsStates.Focused:
 
                         if (currentVessel.altitude - currentVesselData.InitialAltitude >= 3d)
+                        {
                             currentVesselData.LandedState = LandedVesselsStates.Lifted;
+                        }
                         else
+                        {
                             currentVessel.SetWorldVelocity(currentVessel.gravityForPos * -8 * Time.fixedDeltaTime);
+                            currentVessel.UpdateLandedSplashed();
+                        }
+                            
                         break;
                     case LandedVesselsStates.Lifted:
 
                         if (!currentVessel.Landed)
                         {
-                            currentVessel.SetWorldVelocity(currentVessel.gravityForPos.normalized* 2.0f  *Time.fixedDeltaTime);
+                            currentVessel.SetWorldVelocity(currentVessel.gravityForPos.normalized* 10.0f  *Time.fixedDeltaTime);
+                            currentVessel.UpdateLandedSplashed();
                         }
                         else
                         {
@@ -115,6 +136,7 @@ namespace PhysicsRangeExtender
                     case LandedVesselsStates.Landed:
                         currentVessel.SetWorldVelocity(Vector3.zero);
                         break;
+                  
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -122,7 +144,7 @@ namespace PhysicsRangeExtender
 
             vesselsLandedToLoad.RemoveAll(x => x.LandedState == LandedVesselsStates.Landed);
 
-            if (FlightGlobals.ActiveVessel != _tvel && vesselsLandedToLoad.All(x => x.LandedState != LandedVesselsStates.NotFocused))
+            if (FlightGlobals.ActiveVessel != _tvel && vesselsLandedToLoad.All(x => x.LandedState != LandedVesselsStates.NotFocused && x.LandedState != LandedVesselsStates.Focusing))
             {
                 FlightGlobals.ForceSetActiveVessel(_tvel);
             }
@@ -174,6 +196,8 @@ namespace PhysicsRangeExtender
 
             if (vesselsLandedToLoad.Any(x => x.LandedState == LandedVesselsStates.NotFocused))
                 overrallStatus = LandedVesselsStates.NotFocused;
+            else if (vesselsLandedToLoad.Any(x => x.LandedState == LandedVesselsStates.Focusing))
+                overrallStatus = LandedVesselsStates.Focusing;
             else if (vesselsLandedToLoad.Any(x => x.LandedState == LandedVesselsStates.Focused))
                 overrallStatus = LandedVesselsStates.Focused;
             else if (vesselsLandedToLoad.Any(x => x.LandedState == LandedVesselsStates.Lifted))
@@ -184,6 +208,11 @@ namespace PhysicsRangeExtender
             switch (overrallStatus)
             {
                 case LandedVesselsStates.NotFocused:
+                    ScreenMessages.PostScreenMessage(
+                        "[PhysicsRangeExtender]Extending terrain: focusing landed vessels.", 3f,
+                        ScreenMessageStyle.UPPER_CENTER);
+                    break;
+                case LandedVesselsStates.Focusing:
                     ScreenMessages.PostScreenMessage(
                         "[PhysicsRangeExtender]Extending terrain: focusing landed vessels.", 3f,
                         ScreenMessageStyle.UPPER_CENTER);
@@ -222,6 +251,9 @@ namespace PhysicsRangeExtender
 
             _initialLoading = true;
         }
+   
+
+       
 
         public static void ActivateNoCrashDamage()
         {
@@ -236,11 +268,29 @@ namespace PhysicsRangeExtender
             return v.mainBody.GetAltitude(v.CoM) - Math.Max(v.terrainAltitude, 0) < 100;
         }
 
+        public static void AddVesselToLoad(Vessel vessel)
+        {
+            if (vessel != null && vessel.Landed && vessel.vesselType != VesselType.Debris)
+            {
+                if (!vesselsLandedToLoad.Exists(x => x.Vessel == vessel))
+                {
+                    vesselsLandedToLoad.Add(new TerrainExtender.VesselLandedState
+                    {
+                        Vessel = vessel,
+                        InitialAltitude = vessel.altitude,
+                        LandedState = TerrainExtender.LandedVesselsStates.NotFocused
+                    });
+                }
+            }
+        }
+
         public class VesselLandedState
         {
             public Vessel Vessel { get; set; }
             public LandedVesselsStates LandedState { get; set; }
             public double InitialAltitude { get; set; }
+
+            public double TimeOfState { get; set; }
         }
     }
 }

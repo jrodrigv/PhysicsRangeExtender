@@ -134,7 +134,7 @@ namespace PhysicsRangeExtender
 
                 foreach (var x in FlightGlobals.ActiveVessel.Parts)
                 {
-                    if (x != null)
+                    if (x != null && x.Rigidbody != null)
                     {
                         x.Rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
                     }
