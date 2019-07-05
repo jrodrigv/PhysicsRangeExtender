@@ -31,6 +31,7 @@ namespace PhysicsRangeExtender
         {
             var pqs = FlightGlobals.currentMainBody.pqsController;
 
+
             pqs.horizonDistance = double.MaxValue;
             pqs.maxDetailDistance = double.MaxValue;
             pqs.minDetailDistance = double.MaxValue;
@@ -85,10 +86,17 @@ namespace PhysicsRangeExtender
                 {
                     case LandedVesselsStates.NotFocused:
 
-                        //UpdateSphere();
+                       
                         if (currentVesselData.Vessel != _tvel)
                         {
+                            if (vesselsLandedToLoad.Any(x =>
+                                x.Vessel != currentVessel && x.LandedState == LandedVesselsStates.Focusing)) return;
+
+
+                            currentVessel.OnFlyByWire -= Thratlarasat;
+
                             FlightGlobals.ForceSetActiveVessel(currentVessel);
+                            //UpdateSphere();
                             currentVesselData.LandedState = LandedVesselsStates.Focusing;
                             currentVesselData.TimeOfState = Time.time;
                         }
@@ -103,6 +111,11 @@ namespace PhysicsRangeExtender
                         if (Time.time - currentVesselData.TimeOfState > 2)
                         {
                             currentVesselData.LandedState = LandedVesselsStates.Focused;
+
+                            foreach (var vesselLandedState in vesselsLandedToLoad.Where(x =>x.LandedState == LandedVesselsStates.NotFocused && Vector3.Distance(currentVessel.CoM, x.Vessel.CoM) < 2500))
+                            {
+                                vesselLandedState.LandedState = LandedVesselsStates.Focused;
+                            }
                         }
                         currentVessel.SetWorldVelocity(currentVessel.gravityForPos * -8 * Time.fixedDeltaTime);
                         break;
@@ -123,7 +136,7 @@ namespace PhysicsRangeExtender
 
                         if (!currentVessel.Landed)
                         {
-                            currentVessel.SetWorldVelocity(currentVessel.gravityForPos.normalized* 10.0f  *Time.fixedDeltaTime);
+                            currentVessel.SetWorldVelocity(currentVessel.gravityForPos.normalized* 20.0f  *Time.fixedDeltaTime);
                             currentVessel.UpdateLandedSplashed();
                         }
                         else
@@ -265,23 +278,14 @@ namespace PhysicsRangeExtender
 
         public static bool SortaLanded(Vessel v)
         {
+            if (v.Splashed) return false;
+
             return v.mainBody.GetAltitude(v.CoM) - Math.Max(v.terrainAltitude, 0) < 100;
         }
-
-        public static void AddVesselToLoad(Vessel vessel)
+        private void Thratlarasat(FlightCtrlState s)
         {
-            if (vessel != null && vessel.Landed && vessel.vesselType != VesselType.Debris)
-            {
-                if (!vesselsLandedToLoad.Exists(x => x.Vessel == vessel))
-                {
-                    vesselsLandedToLoad.Add(new TerrainExtender.VesselLandedState
-                    {
-                        Vessel = vessel,
-                        InitialAltitude = vessel.altitude,
-                        LandedState = TerrainExtender.LandedVesselsStates.NotFocused
-                    });
-                }
-            }
+            s.wheelThrottle = 0;
+            s.mainThrottle = 0;
         }
 
         public class VesselLandedState

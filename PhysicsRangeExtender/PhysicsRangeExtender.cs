@@ -79,7 +79,7 @@ namespace PhysicsRangeExtender
         private void NewVesselIsLoaded(Vessel vessel)
         {
             if (vessel != null && vessel.Landed && vessel.vesselType != VesselType.Debris)
-                if (TerrainExtender.vesselsLandedToLoad.All(x => x.Vessel.id != vessel.id))
+                if (TerrainExtender.vesselsLandedToLoad.All(x => x.Vessel != vessel))
                     TerrainExtender.vesselsLandedToLoad.Add(new TerrainExtender.VesselLandedState
                     {
                         Vessel = vessel, InitialAltitude = vessel.altitude,
@@ -132,13 +132,13 @@ namespace PhysicsRangeExtender
                 FlightCamera.fetch.mainCamera.nearClipPlane = Mathf.Clamp(distanceMultiplier, _initialClippingPlane,
                     _initialClippingPlane * 50f);
 
-                foreach (var x in FlightGlobals.ActiveVessel.Parts)
-                {
-                    if (x != null && x.Rigidbody != null)
-                    {
-                        x.Rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
-                    }
-                }
+                //foreach (var x in FlightGlobals.ActiveVessel.Parts)
+                //{
+                //    if (x != null && x.Rigidbody != null)
+                //    {
+                //        x.Rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
+                //    }
+                //}
 
                 if (Time.time - LastFlickeringTime > 60)
                 {
