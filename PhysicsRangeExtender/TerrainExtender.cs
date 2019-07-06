@@ -63,9 +63,11 @@ namespace PhysicsRangeExtender
 
             InitialFetch();
 
-            if (vesselsLandedToLoad.Count == 0) return;
-
+            
             vesselsLandedToLoad.RemoveAll(x => x.Vessel == null);
+
+
+            if (vesselsLandedToLoad.Count == 0) return;
 
             if (!_loading)
             {
@@ -92,8 +94,6 @@ namespace PhysicsRangeExtender
                             if (vesselsLandedToLoad.Any(x =>
                                 x.Vessel != currentVessel && x.LandedState == LandedVesselsStates.Focusing)) return;
 
-
-                            currentVessel.OnFlyByWire -= Thratlarasat;
 
                             FlightGlobals.ForceSetActiveVessel(currentVessel);
                             //UpdateSphere();
@@ -175,7 +175,7 @@ namespace PhysicsRangeExtender
             {
                 foreach (var vessel in FlightGlobals.VesselsLoaded)
                 {
-                    if (vesselsLandedToLoad.Any(x => x.Vessel.id == vessel.id)) continue;
+                    if (vessel.isActiveVessel) continue;
 
                     if ((vessel.Landed || SortaLanded(vessel)) &&
                         vessel.vesselType != VesselType.Debris)
@@ -281,11 +281,6 @@ namespace PhysicsRangeExtender
             if (v.Splashed) return false;
 
             return v.mainBody.GetAltitude(v.CoM) - Math.Max(v.terrainAltitude, 0) < 100;
-        }
-        private void Thratlarasat(FlightCtrlState s)
-        {
-            s.wheelThrottle = 0;
-            s.mainThrottle = 0;
         }
 
         public class VesselLandedState

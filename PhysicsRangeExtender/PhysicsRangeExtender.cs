@@ -78,7 +78,7 @@ namespace PhysicsRangeExtender
 
         private void NewVesselIsLoaded(Vessel vessel)
         {
-            if (vessel != null && vessel.Landed && vessel.vesselType != VesselType.Debris)
+            if (vessel != null && !vessel.isActiveVessel && vessel.Landed && vessel.vesselType != VesselType.Debris && Vector3.Distance(vessel.CoM, FlightGlobals.ActiveVessel.CoM) > 2500 )
                 if (TerrainExtender.vesselsLandedToLoad.All(x => x.Vessel != vessel))
                     TerrainExtender.vesselsLandedToLoad.Add(new TerrainExtender.VesselLandedState
                     {
