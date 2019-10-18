@@ -1,3 +1,6 @@
+= v1.16.0
+- Recompiled for KSP 1.8.0
+
 = v1.15.0
 - Fixes issue were the initial loading was triggered when a 2nd vessel was loaded.
 - Fixes issue in which the active vessel was lifted.
