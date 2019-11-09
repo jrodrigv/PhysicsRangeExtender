@@ -1,3 +1,7 @@
+= v1.17.0
+- Recompiled for KSP 1.8.1
+- Added extension method for other mods to enable/disable PRE if needed (Thanks to @DoctorDavinci)
+
 = v1.16.0
 - Recompiled for KSP 1.8.0
 
