@@ -147,7 +147,7 @@ namespace PhysicsRangeExtender
                 Apply();
         }
 
-        private void Apply()
+        public void Apply()
         {
             if (int.TryParse(_guiGlobalRangeForVessels, out var parseGlobalRange))
             {
