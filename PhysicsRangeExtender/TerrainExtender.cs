@@ -32,15 +32,27 @@ namespace PhysicsRangeExtender
             var pqs = FlightGlobals.currentMainBody.pqsController;
 
 
-            pqs.horizonDistance = double.MaxValue;
+            Debug.Log($" pqs.horizonDistance ={ pqs.horizonDistance}");
+            Debug.Log($" pqs.maxDetailDistance ={   pqs.maxDetailDistance}");
+            Debug.Log($" pqs.minDetailDistance ={   pqs.minDetailDistance}");
+
+            Debug.Log($"  pqs.detailAltitudeMax ={   pqs.detailAltitudeMax}");
+            Debug.Log($" pqs.collapseAltitudeMax ={    pqs.collapseAltitudeMax}");
+            Debug.Log($"   pqs.detailSeaLevelQuads ={     pqs.detailSeaLevelQuads}");
+            Debug.Log($"  pqs.detailAltitudeQuads ={    pqs.detailAltitudeQuads}");
+            Debug.Log($"  pqs.maxQuadLenghtsPerFrame  ={    pqs.maxQuadLenghtsPerFrame }");
+            Debug.Log($"  pqs.visRadSeaLevelValue ={   pqs.visRadSeaLevelValue}");
+            Debug.Log($"  pqs.collapseSeaLevelValue ={   pqs.collapseSeaLevelValue}");
+
+
             pqs.maxDetailDistance = double.MaxValue;
             pqs.minDetailDistance = double.MaxValue;
             pqs.detailAltitudeMax = Mathf.Max(PreSettings.GlobalRange * 1000f, 100000);
             pqs.visRadAltitudeMax = Mathf.Max(PreSettings.GlobalRange * 1000f, 100000);
             pqs.collapseAltitudeMax = Mathf.Max(PreSettings.GlobalRange * 1000f, 100000) * 10;
-            pqs.detailSeaLevelQuads = 3000.0 * Mathf.Max(PreSettings.GlobalRange * 1000f, 100000) / 100000;
-            pqs.detailAltitudeQuads = 3000.0 * Mathf.Max(PreSettings.GlobalRange * 1000f, 100000) / 100000;
-            pqs.maxQuadLenghtsPerFrame = (float) (pqs.detailSeaLevelQuads / pqs.detailAltitudeMax);
+            pqs.detailSeaLevelQuads = 0;
+            pqs.detailAltitudeQuads = 0;
+            pqs.maxQuadLenghtsPerFrame = 0.03f;
             pqs.visRadSeaLevelValue = 200;
             pqs.collapseSeaLevelValue = 200;
             pqs.StartUpSphere();
@@ -94,6 +106,12 @@ namespace PhysicsRangeExtender
                             if (vesselsLandedToLoad.Any(x =>
                                 x.Vessel != currentVessel && x.LandedState == LandedVesselsStates.Focusing)) return;
 
+                            if (InternalCamera.Instance.isActive)
+                            {
+                                InternalCamera.Instance.DisableCamera();
+                                FlightCamera.fetch.EnableCamera();
+                                FlightCamera.fetch.setModeImmediate(FlightCamera.Modes.AUTO);
+                            }
 
                             FlightGlobals.ForceSetActiveVessel(currentVessel);
                             //UpdateSphere();
