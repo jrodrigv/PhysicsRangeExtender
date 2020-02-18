@@ -21,7 +21,6 @@ namespace PhysicsRangeExtender
         private static bool _crashDamage;
         private static bool _joints;
         private bool _initialLoading;
-
         private bool _loading;
         private Vessel _tvel;
 
@@ -106,14 +105,15 @@ namespace PhysicsRangeExtender
                             if (vesselsLandedToLoad.Any(x =>
                                 x.Vessel != currentVessel && x.LandedState == LandedVesselsStates.Focusing)) return;
 
-                            if (InternalCamera.Instance.isActive)
+                            if (InternalCamera.Instance.isActiveAndEnabled)
                             {
                                 InternalCamera.Instance.DisableCamera();
-                                FlightCamera.fetch.EnableCamera();
-                                FlightCamera.fetch.setModeImmediate(FlightCamera.Modes.AUTO);
+                                CameraManager.Instance.SetCameraFlight();
                             }
 
                             FlightGlobals.ForceSetActiveVessel(currentVessel);
+                            CameraManager.Instance.SetCameraFlight();
+
                             //UpdateSphere();
                             currentVesselData.LandedState = LandedVesselsStates.Focusing;
                             currentVesselData.TimeOfState = Time.time;
@@ -178,6 +178,7 @@ namespace PhysicsRangeExtender
             if (FlightGlobals.ActiveVessel != _tvel && vesselsLandedToLoad.All(x => x.LandedState != LandedVesselsStates.NotFocused && x.LandedState != LandedVesselsStates.Focusing))
             {
                 FlightGlobals.ForceSetActiveVessel(_tvel);
+                CameraManager.Instance.SetCameraFlight();
             }
 
             if (vesselsLandedToLoad.Count == 0)
