@@ -28,6 +28,7 @@ namespace PhysicsRangeExtender
 
         public static void UpdateSphere()
         {
+
             var pqs = FlightGlobals.currentMainBody.pqsController;
 
 
@@ -36,16 +37,16 @@ namespace PhysicsRangeExtender
             Debug.Log($" pqs.minDetailDistance ={   pqs.minDetailDistance}");
 
             Debug.Log($"  pqs.detailAltitudeMax ={   pqs.detailAltitudeMax}");
-            Debug.Log($" pqs.collapseAltitudeMax ={    pqs.collapseAltitudeMax}");
-            Debug.Log($"   pqs.detailSeaLevelQuads ={     pqs.detailSeaLevelQuads}");
+            Debug.Log($"  pqs.collapseAltitudeMax ={    pqs.collapseAltitudeMax}");
+            Debug.Log($"  pqs.detailSeaLevelQuads ={     pqs.detailSeaLevelQuads}");
             Debug.Log($"  pqs.detailAltitudeQuads ={    pqs.detailAltitudeQuads}");
             Debug.Log($"  pqs.maxQuadLenghtsPerFrame  ={    pqs.maxQuadLenghtsPerFrame }");
             Debug.Log($"  pqs.visRadSeaLevelValue ={   pqs.visRadSeaLevelValue}");
             Debug.Log($"  pqs.collapseSeaLevelValue ={   pqs.collapseSeaLevelValue}");
 
 
-            pqs.maxDetailDistance = double.MaxValue;
-            pqs.minDetailDistance = double.MaxValue;
+            //pqs.maxDetailDistance = double.MaxValue;
+            //pqs.minDetailDistance = double.MaxValue;
             pqs.detailAltitudeMax = Mathf.Max(PreSettings.GlobalRange * 1000f, 100000);
             pqs.visRadAltitudeMax = Mathf.Max(PreSettings.GlobalRange * 1000f, 100000);
             pqs.collapseAltitudeMax = Mathf.Max(PreSettings.GlobalRange * 1000f, 100000) * 10;

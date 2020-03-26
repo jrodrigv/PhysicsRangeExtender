@@ -78,11 +78,12 @@ namespace PhysicsRangeExtender
 
         private void NewVesselIsLoaded(Vessel vessel)
         {
-            if (vessel != null && !vessel.isActiveVessel && vessel.Landed && vessel.vesselType != VesselType.Debris && Vector3.Distance(vessel.CoM, FlightGlobals.ActiveVessel.CoM) > 2500 )
+            if (vessel != null && !vessel.isActiveVessel && vessel.Landed && vessel.vesselType != VesselType.Debris && Vector3.Distance(vessel.CoM, FlightGlobals.ActiveVessel.CoM) > 2500)
                 if (TerrainExtender.vesselsLandedToLoad.All(x => x.Vessel != vessel))
                     TerrainExtender.vesselsLandedToLoad.Add(new TerrainExtender.VesselLandedState
                     {
-                        Vessel = vessel, InitialAltitude = vessel.altitude,
+                        Vessel = vessel,
+                        InitialAltitude = vessel.altitude,
                         LandedState = TerrainExtender.LandedVesselsStates.NotFocused
                     });
         }
@@ -214,7 +215,7 @@ namespace PhysicsRangeExtender
                 return true;
 
             var altitudeAtPos =
-                (double) FlightGlobals.getAltitudeAtPos(FlightGlobals.ActiveVessel.transform.position,
+                (double)FlightGlobals.getAltitudeAtPos(FlightGlobals.ActiveVessel.transform.position,
                     FlightGlobals.ActiveVessel.orbit.referenceBody);
 
             if (altitudeAtPos / FlightGlobals.ActiveVessel.orbit.referenceBody.inverseRotThresholdAltitude >
