@@ -64,20 +64,18 @@ namespace PhysicsRangeExtender
             if (!PreSettings.ModEnabled) return;
             if (!PreSettings.TerrainExtenderEnabled) return;
             if (!FlightGlobals.ready) return;
-
+            if (FlightGlobals.currentMainBody == null) return;
+            if (FlightGlobals.currentMainBody.pqsController == null) return;
+            if (FlightGlobals.currentMainBody.pqsController.isBuildingMaps) return;
 
             ExtendTerrainForLandedVessels();
         }
 
         private void ExtendTerrainForLandedVessels()
         {
-            if (FlightGlobals.currentMainBody != null && FlightGlobals.currentMainBody.pqsController.isBuildingMaps) return;
-
             InitialFetch();
 
-            
             vesselsLandedToLoad.RemoveAll(x => x.Vessel == null);
-
 
             if (vesselsLandedToLoad.Count == 0) return;
 
