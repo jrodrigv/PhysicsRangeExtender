@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Smooth.Delegates;
 using UnityEngine;
 
 namespace PhysicsRangeExtender
@@ -31,22 +32,21 @@ namespace PhysicsRangeExtender
 
             var pqs = FlightGlobals.currentMainBody.pqsController;
 
+            //Debug.Log($" pqs.horizonDistance ={ pqs.horizonDistance}");
+            //Debug.Log($" pqs.maxDetailDistance ={   pqs.maxDetailDistance}");
+            //Debug.Log($" pqs.minDetailDistance ={   pqs.minDetailDistance}");
 
-            Debug.Log($" pqs.horizonDistance ={ pqs.horizonDistance}");
-            Debug.Log($" pqs.maxDetailDistance ={   pqs.maxDetailDistance}");
-            Debug.Log($" pqs.minDetailDistance ={   pqs.minDetailDistance}");
-
-            Debug.Log($"  pqs.detailAltitudeMax ={   pqs.detailAltitudeMax}");
-            Debug.Log($"  pqs.collapseAltitudeMax ={    pqs.collapseAltitudeMax}");
-            Debug.Log($"  pqs.detailSeaLevelQuads ={     pqs.detailSeaLevelQuads}");
-            Debug.Log($"  pqs.detailAltitudeQuads ={    pqs.detailAltitudeQuads}");
-            Debug.Log($"  pqs.maxQuadLenghtsPerFrame  ={    pqs.maxQuadLenghtsPerFrame }");
-            Debug.Log($"  pqs.visRadSeaLevelValue ={   pqs.visRadSeaLevelValue}");
-            Debug.Log($"  pqs.collapseSeaLevelValue ={   pqs.collapseSeaLevelValue}");
-
+            //Debug.Log($"  pqs.detailAltitudeMax ={   pqs.detailAltitudeMax}");
+            //Debug.Log($"  pqs.collapseAltitudeMax ={    pqs.collapseAltitudeMax}");
+            //Debug.Log($"  pqs.detailSeaLevelQuads ={     pqs.detailSeaLevelQuads}");
+            //Debug.Log($"  pqs.detailAltitudeQuads ={    pqs.detailAltitudeQuads}");
+            //Debug.Log($"  pqs.maxQuadLenghtsPerFrame  ={    pqs.maxQuadLenghtsPerFrame }");
+            //Debug.Log($"  pqs.visRadSeaLevelValue ={   pqs.visRadSeaLevelValue}");
+            //Debug.Log($"  pqs.collapseSeaLevelValue ={   pqs.collapseSeaLevelValue}");
 
             //pqs.maxDetailDistance = double.MaxValue;
             //pqs.minDetailDistance = double.MaxValue;
+
             pqs.detailAltitudeMax = Mathf.Max(PreSettings.GlobalRange * 1000f, 100000);
             pqs.visRadAltitudeMax = Mathf.Max(PreSettings.GlobalRange * 1000f, 100000);
             pqs.collapseAltitudeMax = Mathf.Max(PreSettings.GlobalRange * 1000f, 100000) * 10;
@@ -71,7 +71,7 @@ namespace PhysicsRangeExtender
 
         private void ExtendTerrainForLandedVessels()
         {
-            if (FlightGlobals.currentMainBody.pqsController.isBuildingMaps) return;
+            if (FlightGlobals.currentMainBody != null && FlightGlobals.currentMainBody.pqsController.isBuildingMaps) return;
 
             InitialFetch();
 
@@ -111,6 +111,8 @@ namespace PhysicsRangeExtender
                                 InternalCamera.Instance.DisableCamera();
                                 CameraManager.Instance.SetCameraFlight();
                             }
+
+                            MakingVesselPartsIndestructible(currentVessel);
 
                             FlightGlobals.ForceSetActiveVessel(currentVessel);
                             CameraManager.Instance.SetCameraFlight();
@@ -186,6 +188,14 @@ namespace PhysicsRangeExtender
             {
                 DeactivateNoCrashDamage();
                 _loading = false;
+            }
+        }
+
+        private static void MakingVesselPartsIndestructible(Vessel currentVessel)
+        {
+            foreach (var currentVesselPart in currentVessel.parts)
+            {
+                currentVesselPart.crashTolerance = Math.Max(currentVesselPart.crashTolerance, 1000);
             }
         }
 
