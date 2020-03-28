@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using Smooth.Delegates;
 using UnityEngine;
 
 namespace PhysicsRangeExtender
@@ -25,27 +23,11 @@ namespace PhysicsRangeExtender
         private bool _loading;
         private Vessel _tvel;
 
-        public static List<VesselLandedState> vesselsLandedToLoad { get; set; } = new List<VesselLandedState>();
+        public static List<VesselLandedState> VesselsLandedToLoad { get; set; } = new List<VesselLandedState>();
 
         public static void UpdateSphere()
         {
-
             var pqs = FlightGlobals.currentMainBody.pqsController;
-
-            //Debug.Log($" pqs.horizonDistance ={ pqs.horizonDistance}");
-            //Debug.Log($" pqs.maxDetailDistance ={   pqs.maxDetailDistance}");
-            //Debug.Log($" pqs.minDetailDistance ={   pqs.minDetailDistance}");
-
-            //Debug.Log($"  pqs.detailAltitudeMax ={   pqs.detailAltitudeMax}");
-            //Debug.Log($"  pqs.collapseAltitudeMax ={    pqs.collapseAltitudeMax}");
-            //Debug.Log($"  pqs.detailSeaLevelQuads ={     pqs.detailSeaLevelQuads}");
-            //Debug.Log($"  pqs.detailAltitudeQuads ={    pqs.detailAltitudeQuads}");
-            //Debug.Log($"  pqs.maxQuadLenghtsPerFrame  ={    pqs.maxQuadLenghtsPerFrame }");
-            //Debug.Log($"  pqs.visRadSeaLevelValue ={   pqs.visRadSeaLevelValue}");
-            //Debug.Log($"  pqs.collapseSeaLevelValue ={   pqs.collapseSeaLevelValue}");
-
-            //pqs.maxDetailDistance = double.MaxValue;
-            //pqs.minDetailDistance = double.MaxValue;
 
             pqs.detailAltitudeMax = Mathf.Max(PreSettings.GlobalRange * 1000f, 100000);
             pqs.visRadAltitudeMax = Mathf.Max(PreSettings.GlobalRange * 1000f, 100000);
@@ -75,9 +57,9 @@ namespace PhysicsRangeExtender
         {
             InitialFetch();
 
-            vesselsLandedToLoad.RemoveAll(x => x.Vessel == null);
+            VesselsLandedToLoad.RemoveAll(x => x.Vessel == null);
 
-            if (vesselsLandedToLoad.Count == 0) return;
+            if (VesselsLandedToLoad.Count == 0) return;
 
             if (!_loading)
             {
@@ -87,7 +69,7 @@ namespace PhysicsRangeExtender
                 _tvel = FlightGlobals.ActiveVessel;
             }
 
-            foreach (var currentVesselData in vesselsLandedToLoad)
+            foreach (var currentVesselData in VesselsLandedToLoad)
             {
                 var currentVessel = currentVesselData.Vessel;
 
@@ -101,7 +83,7 @@ namespace PhysicsRangeExtender
                        
                         if (currentVesselData.Vessel != _tvel)
                         {
-                            if (vesselsLandedToLoad.Any(x =>
+                            if (VesselsLandedToLoad.Any(x =>
                                 x.Vessel != currentVessel && x.LandedState == LandedVesselsStates.Focusing)) return;
 
                             if (InternalCamera.Instance.isActiveAndEnabled)
@@ -131,7 +113,7 @@ namespace PhysicsRangeExtender
                         {
                             currentVesselData.LandedState = LandedVesselsStates.Focused;
 
-                            foreach (var vesselLandedState in vesselsLandedToLoad.Where(x =>x.LandedState == LandedVesselsStates.NotFocused && Vector3.Distance(currentVessel.CoM, x.Vessel.CoM) < 2500))
+                            foreach (var vesselLandedState in VesselsLandedToLoad.Where(x =>x.LandedState == LandedVesselsStates.NotFocused && Vector3.Distance(currentVessel.CoM, x.Vessel.CoM) < 2500))
                             {
                                 vesselLandedState.LandedState = LandedVesselsStates.Focused;
                             }
@@ -174,15 +156,15 @@ namespace PhysicsRangeExtender
                 }
             }
 
-            vesselsLandedToLoad.RemoveAll(x => x.LandedState == LandedVesselsStates.Landed);
+            VesselsLandedToLoad.RemoveAll(x => x.LandedState == LandedVesselsStates.Landed);
 
-            if (FlightGlobals.ActiveVessel != _tvel && vesselsLandedToLoad.All(x => x.LandedState != LandedVesselsStates.NotFocused && x.LandedState != LandedVesselsStates.Focusing))
+            if (FlightGlobals.ActiveVessel != _tvel && VesselsLandedToLoad.All(x => x.LandedState != LandedVesselsStates.NotFocused && x.LandedState != LandedVesselsStates.Focusing))
             {
                 FlightGlobals.ForceSetActiveVessel(_tvel);
                 CameraManager.Instance.SetCameraFlight();
             }
 
-            if (vesselsLandedToLoad.Count == 0)
+            if (VesselsLandedToLoad.Count == 0)
             {
                 DeactivateNoCrashDamage();
                 _loading = false;
@@ -207,7 +189,7 @@ namespace PhysicsRangeExtender
 
                     if ((vessel.Landed || SortaLanded(vessel)) &&
                         vessel.vesselType != VesselType.Debris)
-                        vesselsLandedToLoad.Add(new VesselLandedState
+                        VesselsLandedToLoad.Add(new VesselLandedState
                         {
                             InitialAltitude = vessel.altitude,
                             LandedState = LandedVesselsStates.NotFocused,
@@ -230,23 +212,22 @@ namespace PhysicsRangeExtender
 
         private void ShowMessageTerrainStatus()
         {
-            if (vesselsLandedToLoad.Count == 0) return;
+            if (VesselsLandedToLoad.Count == 0) return;
 
+            var overallStatus = LandedVesselsStates.NotFocused;
 
-            var overrallStatus = LandedVesselsStates.NotFocused;
+            if (VesselsLandedToLoad.Any(x => x.LandedState == LandedVesselsStates.NotFocused))
+                overallStatus = LandedVesselsStates.NotFocused;
+            else if (VesselsLandedToLoad.Any(x => x.LandedState == LandedVesselsStates.Focusing))
+                overallStatus = LandedVesselsStates.Focusing;
+            else if (VesselsLandedToLoad.Any(x => x.LandedState == LandedVesselsStates.Focused))
+                overallStatus = LandedVesselsStates.Focused;
+            else if (VesselsLandedToLoad.Any(x => x.LandedState == LandedVesselsStates.Lifted))
+                overallStatus = LandedVesselsStates.Lifted;
+            else if (VesselsLandedToLoad.Any(x => x.LandedState == LandedVesselsStates.Landed))
+                overallStatus = LandedVesselsStates.Landed;
 
-            if (vesselsLandedToLoad.Any(x => x.LandedState == LandedVesselsStates.NotFocused))
-                overrallStatus = LandedVesselsStates.NotFocused;
-            else if (vesselsLandedToLoad.Any(x => x.LandedState == LandedVesselsStates.Focusing))
-                overrallStatus = LandedVesselsStates.Focusing;
-            else if (vesselsLandedToLoad.Any(x => x.LandedState == LandedVesselsStates.Focused))
-                overrallStatus = LandedVesselsStates.Focused;
-            else if (vesselsLandedToLoad.Any(x => x.LandedState == LandedVesselsStates.Lifted))
-                overrallStatus = LandedVesselsStates.Lifted;
-            else if (vesselsLandedToLoad.Any(x => x.LandedState == LandedVesselsStates.Landed))
-                overrallStatus = LandedVesselsStates.Landed;
-
-            switch (overrallStatus)
+            switch (overallStatus)
             {
                 case LandedVesselsStates.NotFocused:
                     ScreenMessages.PostScreenMessage(
