@@ -105,7 +105,9 @@ namespace PhysicsRangeExtender
                         {
                             currentVesselData.LandedState = LandedVesselsStates.Focused;
                         }
-                        currentVessel.SetWorldVelocity(currentVessel.gravityForPos * -8 * Time.fixedDeltaTime);
+
+                        currentVessel.SetPosition(currentVesselData.InitialPosition + currentVessel.up.normalized * currentVessel.vesselSize.magnitude);
+                        currentVessel.SetWorldVelocity(Vector3.zero);
                         break;
                     case LandedVesselsStates.Focusing:
 
@@ -118,26 +120,23 @@ namespace PhysicsRangeExtender
                                 vesselLandedState.LandedState = LandedVesselsStates.Focused;
                             }
                         }
-                        currentVessel.SetWorldVelocity(currentVessel.gravityForPos * -8 * Time.fixedDeltaTime);
+                        currentVessel.SetPosition(currentVesselData.InitialPosition + currentVessel.up.normalized * currentVessel.vesselSize.magnitude);
+                        currentVessel.SetWorldVelocity(Vector3.zero);
                         break;
                     case LandedVesselsStates.Focused:
 
-                        if (currentVessel.altitude - currentVesselData.InitialAltitude >= 3d)
-                        {
+                        currentVessel.SetPosition(currentVesselData.InitialPosition + currentVessel.up.normalized * currentVessel.vesselSize.magnitude);
+                        currentVessel.SetWorldVelocity(Vector3.zero);
+                        currentVessel.UpdateLandedSplashed();
                             currentVesselData.LandedState = LandedVesselsStates.Lifted;
-                        }
-                        else
-                        {
-                            currentVessel.SetWorldVelocity(currentVessel.gravityForPos * -8 * Time.fixedDeltaTime);
-                            currentVessel.UpdateLandedSplashed();
-                        }
-                            
+                        
                         break;
                     case LandedVesselsStates.Lifted:
 
                         if (!currentVessel.Landed)
                         {
-                            currentVessel.SetWorldVelocity(currentVessel.gravityForPos.normalized* 20.0f  *Time.fixedDeltaTime);
+                            currentVessel.SetWorldVelocity(currentVessel.gravityForPos.normalized * 20.0f * Time.fixedDeltaTime);
+
                             currentVessel.UpdateLandedSplashed();
                         }
                         else
@@ -299,6 +298,8 @@ namespace PhysicsRangeExtender
             public double InitialAltitude { get; set; }
 
             public double TimeOfState { get; set; }
+
+            public Vector3d InitialPosition { get; set; }
         }
     }
 }

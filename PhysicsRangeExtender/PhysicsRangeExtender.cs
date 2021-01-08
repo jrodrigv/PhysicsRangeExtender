@@ -84,8 +84,9 @@ namespace PhysicsRangeExtender
                     {
                         Vessel = vessel,
                         InitialAltitude = vessel.altitude,
+                        InitialPosition = vessel.GetWorldPos3D(),
                         LandedState = TerrainExtender.LandedVesselsStates.NotFocused
-                    });
+                    }); ;
         }
 
 
