@@ -1,4 +1,7 @@
-= v1.19.0
+= v1.20.0
+- Recompiled for KSP 1.11.0
+- Improved physics ease/landing method when TerrainExtender is Enabled
+
 - Recompiled for KSP 1.9.1
 - Fixed critical issue causing KSP to crash when extending terrain in other planets like Moon in RSS.
 - Fixed NREs issue when extending terrain in orbit around the Sun
