@@ -1,3 +1,6 @@
+= v1.21.0
+- Recompiled for KSP 1.12.2
+
 = v1.20.0
 - Recompiled for KSP 1.11.0
 - Improved physics ease/landing method when TerrainExtender is Enabled
