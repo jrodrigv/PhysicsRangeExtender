@@ -16,7 +16,7 @@ namespace PhysicsRangeExtender
         private const float ContentTop = 20;
         public static Gui Fetch;
         public static bool GuiEnabled;
-        public static bool HasAddedButton;
+        private ApplicationLauncherButton button = null;
         private readonly float _incrButtonWidth = 26;
         private readonly float contentWidth = WindowWidth - 2 * LeftIndent;
         private readonly float entryHeight = 20;
@@ -45,6 +45,14 @@ namespace PhysicsRangeExtender
             _gameUiToggle = true;
             _guiGlobalRangeForVessels = PreSettings.GlobalRange.ToString();
             _guiCamFixMultiplier = PreSettings.CamFixMultiplier.ToString(CultureInfo.InvariantCulture);
+        }
+
+        private void OnDestroy()
+        {
+            GameEvents.onShowUI.Remove(GameUiEnable);
+            GameEvents.onHideUI.Remove(GameUiDisable);
+            ApplicationLauncher.Instance.RemoveModApplication(this.button);
+            this.button = null;
         }
 
         // ReSharper disable once InconsistentNaming
@@ -183,12 +191,13 @@ namespace PhysicsRangeExtender
 
         private void AddToolbarButton()
         {
-            if (!HasAddedButton)
+            if (null == this.button)
             {
                 Texture buttonTexture = GameDatabase.Instance.GetTexture("PhysicsRangeExtender/Textures/icon", false);
-                ApplicationLauncher.Instance.AddModApplication(EnableGui, DisableGui, Dummy, Dummy, Dummy, Dummy,
-                    ApplicationLauncher.AppScenes.ALWAYS, buttonTexture);
-                HasAddedButton = true;
+                this.button = ApplicationLauncher.Instance.AddModApplication(
+                        EnableGui, DisableGui, Dummy, Dummy, Dummy, Dummy,
+                        ApplicationLauncher.AppScenes.ALWAYS, buttonTexture
+                    );
             }
         }
 
