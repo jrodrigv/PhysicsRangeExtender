@@ -89,9 +89,9 @@
   <ItemGroup>
     <Compile Include="Gui.cs" />
     <Compile Include="PhysicsRangeExtender.cs" />
-    <Compile Include="PreSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TerrainExtender.cs" />
+    <Compile Include="PRESettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Distribution\GameData\PhysicsRangeExtender\LICENSE.txt" />
